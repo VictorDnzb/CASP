@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Sistema de Patrimônio{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo-bar">
+            <img src="{{ url_for('static', filename='images/etec-identidade.jpg') }}" alt="CPS" class="logo">
+            <img src="{{ url_for('static', filename='images/cps-logo-identidade.jpg') }}" alt="Etec" class="logo">
+            <img src="{{ url_for('static', filename='images/sp.jpeg') }}" alt="Governo SP" class="logo">
+        </div>
+
+        {% if 'usuario' in session %}
+        <nav class="menu-bar">
+            <ul>
+                <li><a href="{{ url_for('cadastro') }}">CADASTRO</a></li>
+                <li><a href="{{ url_for('listar') }}">LISTAR PATRIMÔNIOS</a></li>
+                <li><a href="{{ url_for('gerar_relatorio_pdf') }}">RELATÓRIO</a></li>
+                <li><a href="{{ url_for('logout') }}" class="btn-sair">SAIR</a></li>
+            </ul>
+        </nav>
+        {% endif %}
+    </header>
+    
+    <div class="{% if 'usuario' in session %}layout{% else %}content-full{% endif %}">
+        {% if 'usuario' in session %}
+        <nav class="sidebar">
+            <div class="admin-card">
+                <h4 class="admin-title">Identificação</h4>
+                <div class="admin-photo-wrapper">
+                    <img src="{{ url_for('static', filename='images/renata.enc') }}" alt="Foto da Renata" />
+                </div>
+                <div class="admin-info">
+                    <strong>{{ session['nome_usuario'] }}</strong><br />
+                    Administradora
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+                
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
