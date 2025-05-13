@@ -3,7 +3,6 @@ from werkzeug.utils import secure_filename
 from io import BytesIO
 import os
 from datetime import datetime
-import csv
 import mysql.connector
 from mysql.connector import Error
 from reportlab.lib.pagesizes import letter
@@ -38,13 +37,11 @@ def get_db_connection():
             return conn
     except Error as e:
         print(f"Erro de conexão MySQL: {e}")
-        flash("Erro ao conectar ao banco de dados", 'danger')
-    return None
+        return None
 
 def allowed_file(filename):
     """Verifica extensões permitidas"""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def create_upload_folder():
     """Cria pasta de uploads se não existir"""
@@ -59,23 +56,33 @@ def index():
         return redirect(url_for('listar'))
     return redirect(url_for('login'))
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# Simulando banco de dados de usuários
+users = {
+    'Renata': generate_password_hash('1234')  # Armazenando a senha com hash
+}
+
+# Rota de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Autenticação de usuário"""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
-        # Autenticação simples (substitua por consulta ao banco)
-        if username == 'admin' and password == 'admin123':
+
+        # Verificar se o usuário existe e se a senha está correta
+        stored_password_hash = users.get(username)
+        if stored_password_hash and check_password_hash(stored_password_hash, password):
             session['usuario'] = username
             session['nome_usuario'] = 'Administrador'
             flash('Login realizado com sucesso!', 'success')
             return redirect(url_for('cadastro'))
-        
+
         flash('Credenciais inválidas', 'danger')
-    
+
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -131,6 +138,7 @@ def cadastrar():
     # Conexão com o banco
     conn = get_db_connection()
     if not conn:
+        flash("Erro ao conectar ao banco de dados", "danger")
         return redirect(url_for('cadastro'))
     
     try:
@@ -171,6 +179,7 @@ def listar():
 
     conn = get_db_connection()
     if not conn:
+        flash("Erro ao conectar ao banco de dados", 'danger')
         return render_template('listar.html', patrimonios=[], filtro={})
     
     try:
@@ -201,29 +210,18 @@ def listar():
             cursor.close()
             conn.close()
 
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-
-# ... (mantenha as outras importações e configurações existentes)
-
-
-
-
 @app.route('/relatorio-pdf')
 def gerar_relatorio_pdf():
     """Gera relatório em PDF"""
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
+    conn = get_db_connection()
+    if not conn:
+        flash("Erro de conexão com o banco", 'danger')
+        return redirect(url_for('listar'))
+
     try:
-        conn = get_db_connection()
-        if not conn:
-            flash("Erro de conexão com o banco", 'danger')
-            return redirect(url_for('listar'))
-        
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT nome, descricao, localizacao, condicao, origem,
@@ -286,8 +284,10 @@ def gerar_relatorio_pdf():
         flash(f'Erro ao gerar PDF: {str(e)}', 'danger')
         return redirect(url_for('listar'))
     finally:
-        if cursor: cursor.close()
-        if conn and conn.is_connected(): conn.close()
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
 
 @app.route('/imagens/<filename>')
 def servir_imagem(filename):
@@ -297,13 +297,5 @@ def servir_imagem(filename):
 # Inicialização
 if __name__ == '__main__':
     create_upload_folder()
-    
-    # Verificar conexão com o banco
-    test_conn = get_db_connection()
-    if test_conn:
-        print("✅ Conexão com o banco estabelecida!")
-        test_conn.close()
-    else:
-        print("❌ Falha na conexão com o banco!")
-    
     app.run(host='0.0.0.0', port=5000, debug=True)
+
