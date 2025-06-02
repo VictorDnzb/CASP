@@ -33,5 +33,5 @@ update users set
 password = "scrypt:32768:8:1$hhzDefW5iNKB67hp$0b660ccad6f5dc3534f32964e93d0767223c014056f42eb26b116923226599f2afd85e909d8a005fd4c58688178a5b82b0bae354331ae706ab1e2780403ab1f3"
 where id = 1;
 
-select * from patrimonio;
-select * from users;
+select nome,origem from patrimonio;
+select username from users;
