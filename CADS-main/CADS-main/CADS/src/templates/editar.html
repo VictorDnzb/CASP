@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Patrimônio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Editar Patrimônio</h1>
+    </header>
+    <main>
+        <form method="post" action="#">
+            <label for="nome">Nome do Patrimônio:</label>
+            <input type="text" id="nome" name="nome" value="Exemplo" required>
+
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="descricao" value="Descrição do item" required>
+
+            <label for="localizacao">Localização:</label>
+            <input type="text" id="localizacao" name="localizacao" value="Sala 101" required>
+
+            <button type="submit">Salvar Alterações</button>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2025 - ETEC Ilza Nascimento Pintus</p>
+    </footer>
+</body>
+</html>

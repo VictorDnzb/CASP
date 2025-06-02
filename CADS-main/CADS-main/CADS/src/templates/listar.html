@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Patrimônios{% endblock %}
+
+{% block content %}
+
+<h2>Pesquisar Patrimônio</h2>
+
+<form method="get" action="{{ url_for('listar') }}">
+    <div class="filter-container">
+        <div class="filter-grid">
+            <input type="text" name="nome" placeholder="Nome" value="{{ filtro.get('nome', '') }}" class="filter-input">
+            <input type="text" name="descricao" placeholder="Descrição" value="{{ filtro.get('descricao', '') }}" class="filter-input">
+            <input type="text" name="localizacao" placeholder="Localização" value="{{ filtro.get('localizacao', '') }}" class="filter-input">
+            <input type="text" name="condicao" placeholder="Condição" value="{{ filtro.get('condicao', '') }}" class="filter-input">
+            <input type="text" name="origem" placeholder="Origem" value="{{ filtro.get('origem', '') }}" class="filter-input">
+            <input type="text" name="marca" placeholder="Marca" value="{{ filtro.get('marca', '') }}" class="filter-input">
+            <input type="text" name="codigo_doador" placeholder="Código do Doador" value="{{ filtro.get('codigo_doador', '') }}" class="filter-input">
+            <input type="text" name="codigo_cps" placeholder="Código do CPS" value="{{ filtro.get('codigo_cps', '') }}" class="filter-input">
+            <input type="text" name="quantidade" placeholder="Quantidade" value="{{ filtro.get('quantidade', '') }}" class="filter-input">
+        </div>
+        
+        <div class="filter-buttons">
+            <button type="submit" class="filter-btn">
+                <i class="fas fa-filter"></i> Filtrar
+            </button>
+            <a href="{{ url_for('gerar_relatorio_pdf') }}" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Gerar PDF
+            </a>
+        </div>
+    </div>
+</form>
+
+<!-- Tabela de Patrimônios -->
+<div class="table-responsive">
+    <h1>Patrimônios Cadastrados</h1>    
+    <table class="patrimonio-table">
+        <!-- Conteúdo da tabela permanece o mesmo -->
+        <thead>
+            <tr>
+                <th>Imagem</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Localização</th>
+                <th>Condição</th>
+                <th>Origem</th>
+                <th>Marca</th>
+                <th>Código Doador</th>
+                <th>Código CPS</th>
+                <th>Quantidade</th>
+                <th>Data Cadastro</th>
+                <th>Usuário</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in patrimonios %}
+            <tr>
+                <td class="image-cell">
+                    {% if p.imagem %}
+                    <img src="{{ url_for('static', filename='uploads/' + p.imagem) }}" alt="{{ p.nome }}" class="thumbnail">
+                    {% else %}
+                    <span class="no-image">Sem imagem</span>
+                    {% endif %}
+                </td>
+                <td>{{ p.nome }}</td>
+                <td>{{ p.descricao }}</td>
+                <td>{{ p.localizacao }}</td>
+                <td>{{ p.condicao }}</td>
+                <td>{{ p.origem }}</td>
+                <td>{{ p.marca }}</td>
+                <td>{{ p.codigo_doador }}</td>
+                <td>{{ p.codigo_cps }}</td>
+                <td>{{ p.quantidade }}</td>
+                <td>{{ p.data_cadastro }}</td>
+                <td>{{ p.usuario_cadastro }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
