@@ -13,17 +13,16 @@ from reportlab.lib.units import inch
 
 # Inicialização do Flask
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_segura'  # Altere para uma chave única
+app.secret_key = 'secret_key'  # Altere para uma chave única
 
-# Configurações
+
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Configuração do Banco de Dados - ATUALIZE COM SEUS DADOS!
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'root',          # Seu usuário MySQL
+    'user': 'root',          #  MySQL
     'password': '',          # Sua senha MySQL
     'database': 'patrimonio' # Nome do banco
 }
@@ -48,7 +47,7 @@ def create_upload_folder():
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
 
-# Rotas Básicas
+# basic routes
 @app.route('/')
 def index():
     """Rota principal"""
