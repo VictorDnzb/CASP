@@ -4,78 +4,137 @@
 
 {% block content %}
 
-<h2>Pesquisar Patrimônio</h2>
+<div class="container">
+    <h2 class="page-title">Patrimônios Cadastrados</h2>
 
-<form method="get" action="{{ url_for('listar') }}">
-    <div class="filter-container">
-        <div class="filter-grid">
-            <input type="text" name="nome" placeholder="Nome" value="{{ filtro.get('nome', '') }}" class="filter-input">
-            <input type="text" name="descricao" placeholder="Descrição" value="{{ filtro.get('descricao', '') }}" class="filter-input">
-            <input type="text" name="localizacao" placeholder="Localização" value="{{ filtro.get('localizacao', '') }}" class="filter-input">
-            <input type="text" name="condicao" placeholder="Condição" value="{{ filtro.get('condicao', '') }}" class="filter-input">
-            <input type="text" name="origem" placeholder="Origem" value="{{ filtro.get('origem', '') }}" class="filter-input">
-            <input type="text" name="marca" placeholder="Marca" value="{{ filtro.get('marca', '') }}" class="filter-input">
-            <input type="text" name="codigo_doador" placeholder="Código do Doador" value="{{ filtro.get('codigo_doador', '') }}" class="filter-input">
-            <input type="text" name="codigo_cps" placeholder="Código do CPS" value="{{ filtro.get('codigo_cps', '') }}" class="filter-input">
-            <input type="text" name="quantidade" placeholder="Quantidade" value="{{ filtro.get('quantidade', '') }}" class="filter-input">
-        </div>
-        
-        <div class="filter-buttons">
-            <button type="submit" class="filter-btn">
-                <i class="fas fa-filter"></i> Filtrar
-            </button>
-            <a href="{{ url_for('gerar_relatorio_pdf') }}" class="btn btn-pdf">
-                <i class="fas fa-file-pdf"></i> Gerar PDF
-            </a>
-        </div>
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form method="get" action="{{ url_for('listar') }}">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <input type="text" name="nome" placeholder="Nome" value="{{ filtro.get('nome', '') }}" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <input type="text" name="descricao" placeholder="Descrição" value="{{ filtro.get('descricao', '') }}" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <input type="text" name="localizacao" placeholder="Localização" value="{{ filtro.get('localizacao', '') }}" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <select name="condicao" class="filter-select">
+                        <option value="">Todas condições</option>
+                        <option value="ÓTIMO" {% if filtro.get('condicao') == 'ÓTIMO' %}selected{% endif %}>Ótimo</option>
+                        <option value="BOM" {% if filtro.get('condicao') == 'BOM' %}selected{% endif %}>Bom</option>
+                        <option value="RECUPERÁVEL" {% if filtro.get('condicao') == 'RECUPERÁVEL' %}selected{% endif %}>Recuperável</option>
+                        <option value="PÉSSIMO" {% if filtro.get('condicao') == 'PÉSSIMO' %}selected{% endif %}>Péssimo</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="text" name="marca" placeholder="Marca" value="{{ filtro.get('marca', '') }}" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <input type="text" name="codigo_cps" placeholder="Código CPS" value="{{ filtro.get('codigo_cps', '') }}" class="filter-input">
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-filter">
+                    <i class="fas fa-filter"></i> Aplicar Filtros
+                </button>
+                <a href="{{ url_for('listar') }}" class="btn btn-clear">
+                    <i class="fas fa-undo"></i> Limpar
+                </a>
+                <a href="{{ url_for('gerar_relatorio_pdf') }}" class="btn btn-pdf">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </a>
+                <a href="{{ url_for('exportar_excel') }}" class="btn btn-excel">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </a>
+            </div>
+        </form>
     </div>
-</form>
 
-<!-- Tabela de Patrimônios -->
-<div class="table-responsive">
-    <h1>Patrimônios Cadastrados</h1>    
-    <table class="patrimonio-table">
-        <!-- Conteúdo da tabela permanece o mesmo -->
-        <thead>
-            <tr>
-                <th>Imagem</th>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Localização</th>
-                <th>Condição</th>
-                <th>Origem</th>
-                <th>Marca</th>
-                <th>Código Doador</th>
-                <th>Código CPS</th>
-                <th>Quantidade</th>
-                <th>Data Cadastro</th>
-                <th>Usuário</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in patrimonios %}
-            <tr>
-                <td class="image-cell">
-                    {% if p.imagem %}
-                    <img src="{{ url_for('static', filename='uploads/' + p.imagem) }}" alt="{{ p.nome }}" class="thumbnail">
+    <!-- Tabela de Patrimônios -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="patrimonio-table">
+                <thead>
+                    <tr>
+                        <th>Imagem</th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Localização</th>
+                        <th>Condição</th>
+                        <th>Origem</th>
+                        <th>Marca</th>
+                        <th>Código Doador</th>
+                        <th>Código CPS</th>
+                        <th>Quantidade</th>
+                        <th>Data Cadastro</th>
+                        <th>Usuário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in patrimonios %}
+                    <tr class="patrimonio-row {% if loop.index > 5 %}hidden{% endif %}">
+                        <td class="image-cell">
+                            {% if p.imagem %}
+                            <img src="{{ url_for('static', filename='uploads/' + p.imagem) }}" alt="{{ p.nome }}" class="thumbnail">
+                            {% else %}
+                            <span class="no-image">Sem imagem</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.nome }}</td>
+                        <td>{{ p.descricao|truncate(50) }}</td>
+                        <td>{{ p.localizacao }}</td>
+                        <td>
+                            <span class="condition-badge condition-{{ p.condicao|lower }}">
+                                {{ p.condicao }}
+                            </span>
+                        </td>
+                        <td>{{ p.origem }}</td>
+                        <td>{{ p.marca }}</td>
+                        <td>{{ p.codigo_doador }}</td>
+                        <td>{{ p.codigo_cps }}</td>
+                        <td>{{ p.quantidade }}</td>
+                        <td>{{ p.data_cadastro.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ p.usuario_cadastro }}</td>
+                        <td class="actions-cell">
+                            <a href="{{ url_for('editar_patrimonio', id=p.id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
                     {% else %}
-                    <span class="no-image">Sem imagem</span>
-                    {% endif %}
-                </td>
-                <td>{{ p.nome }}</td>
-                <td>{{ p.descricao }}</td>
-                <td>{{ p.localizacao }}</td>
-                <td>{{ p.condicao }}</td>
-                <td>{{ p.origem }}</td>
-                <td>{{ p.marca }}</td>
-                <td>{{ p.codigo_doador }}</td>
-                <td>{{ p.codigo_cps }}</td>
-                <td>{{ p.quantidade }}</td>
-                <td>{{ p.data_cadastro }}</td>
-                <td>{{ p.usuario_cadastro }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    <tr>
+                        <td colspan="13" class="text-center">Nenhum patrimônio encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if patrimonios|length > 5 %}
+        <div class="ver-mais-container">
+            <button id="ver-mais-btn" class="btn-ver-mais">Ver Mais</button>
+        </div>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Ver Mais
+    const verMaisBtn = document.getElementById('ver-mais-btn');
+    if (verMaisBtn) {
+        verMaisBtn.addEventListener('click', function() {
+            const hiddenRows = document.querySelectorAll('.patrimonio-row.hidden');
+            hiddenRows.forEach(row => row.classList.remove('hidden'));
+            this.style.display = 'none';
+        });
+    }
+});
+</script>
+
 {% endblock %}
