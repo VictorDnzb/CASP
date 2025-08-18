@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}Sistema de Patrimônio{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -21,6 +22,7 @@
                 <li><a href="{{ url_for('listar') }}">LISTAR PATRIMÔNIOS</a></li>
                 <li><a href="{{ url_for('gerar_relatorio_pdf') }}">RELATÓRIO</a></li>
                 <li><a href="{{ url_for('logout') }}" class="btn-sair">SAIR</a></li>
+                <li><a href="{{ url_for('importar_excel') }}">IMPORTAR EXCEL</a></li>
             </ul>
         </nav>
         {% endif %}
