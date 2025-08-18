@@ -1,30 +1,139 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Patrimônio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <header>
-        <h1>Editar Patrimônio</h1>
-    </header>
-    <main>
-        <form method="post" action="#">
-            <label for="nome">Nome do Patrimônio:</label>
-            <input type="text" id="nome" name="nome" value="Exemplo" required>
+{% extends "base.html" %}
 
-            <label for="descricao">Descrição:</label>
-            <input type="text" id="descricao" name="descricao" value="Descrição do item" required>
+{% block title %}Editar Patrimônio{% endblock %}
 
-            <label for="localizacao">Localização:</label>
-            <input type="text" id="localizacao" name="localizacao" value="Sala 101" required>
+{% block content %}
+<div class="content">
+    <div class="grid-cadastro-layout">
+        <div class="form-cadastro">
+            <h1>Editar Patrimônio</h1>
+            
+            <form method="POST"
+                  action="{{ url_for('editar_patrimonio', id=patrimonio.id) }}"
+                  enctype="multipart/form-data"
+                  class="needs-validation"
+                  novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nome">Nome *</label>
+                        <input type="text" class="form-control" id="nome" name="nome" 
+                               value="{{ patrimonio.nome or '' }}" required>
+                        <div class="invalid-feedback">
+                            Por favor, informe o nome.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descricao">Descrição</label>
+                        <textarea class="form-control" id="descricao" name="descricao" 
+                                  rows="3">{{ patrimonio.descricao or '' }}</textarea>
+                        <div class="invalid-feedback">
+                            Por favor, informe a descrição.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="localizacao">Localização *</label>
+                        <input type="text" class="form-control" id="localizacao" name="localizacao" 
+                               value="{{ patrimonio.localizacao or '' }}" required>
+                        <div class="invalid-feedback">
+                            Por favor, informe a localização.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="condicao">Condição *</label>
+                        <select class="form-control" id="condicao" name="condicao" required>
+                            <option value="">Selecione...</option>
+                            <option value="ÓTIMO" {% if patrimonio.condicao == 'ÓTIMO' %}selected{% endif %}>Ótimo</option>
+                            <option value="BOM" {% if patrimonio.condicao == 'BOM' %}selected{% endif %}>Bom</option>
+                            <option value="RECUPERÁVEL" {% if patrimonio.condicao == 'RECUPERÁVEL' %}selected{% endif %}>Recuperável</option>
+                            <option value="PÉSSIMO" {% if patrimonio.condicao == 'PÉSSIMO' %}selected{% endif %}>Péssimo</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, selecione a condição.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantidade">Quantidade *</label>
+                        <input type="number" class="form-control" id="quantidade" name="quantidade" 
+                               value="{{ patrimonio.quantidade or '' }}" min="1" required>
+                        <div class="invalid-feedback">
+                            Quantidade deve ser pelo menos 1.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="origem">Origem *</label>
+                        <input type="text" class="form-control" id="origem" name="origem" 
+                               value="{{ patrimonio.origem or '' }}" required>
+                        <div class="invalid-feedback">
+                            Por favor, informe a origem.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="marca">Marca</label>
+                        <input type="text" class="form-control" id="marca" name="marca" 
+                               value="{{ patrimonio.marca or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="codigo_cps">Código CPS</label>
+                        <input type="text" class="form-control" id="codigo_cps" name="codigo_cps" 
+                               value="{{ patrimonio.codigo_cps or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="codigo_doador">Código Doador</label>
+                        <input type="text" class="form-control" id="codigo_doador" name="codigo_doador" 
+                               value="{{ patrimonio.codigo_doador or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imagem">Imagem</label>
+                        <input type="file" class="form-control" id="imagem" name="imagem" accept="image/*">
+                        <small class="text-muted">Deixe em branco para manter a imagem atual</small>
+                        {% if patrimonio.imagem %}
+                        <div class="foto-preview">
+                            <img src="{{ url_for('static', filename='uploads/' + patrimonio.imagem) }}" 
+                                 alt="Imagem atual">
+                            <label>Imagem atual</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                        <a href="{{ url_for('listar') }}" class="btn btn-cancelar">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-            <button type="submit">Salvar Alterações</button>
-        </form>
-    </main>
-    <footer>
-        <p>&copy; 2025 - ETEC Ilza Nascimento Pintus</p>
-    </footer>
-</body>
-</html>
+<script>
+(function() {
+    'use strict';
+    
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+</script>
+{% endblock %}
