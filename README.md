@@ -1,35 +1,74 @@
-# CADS
-Trabalho de conclusão de curso(CADS), sistema de gestão patrimonial.
+# Aprendizado por Projeto Integrado (API) - Template
 
-Este guia contém instruções detalhadas para clonar, instalar e configurar o sistema em sua máquina local.
+Template para os projetos de API, ensinando na utilização do repositório digital "GitHub". 
 
-Pré-requisitos
-Antes de começar, certifique-se de que os seguintes requisitos estejam atendidos:
+Projeto baseado na metodologia ágil SCRUM, procurando desenvolver a Proatividade, Autonomia, Colaboração e Entrega de Resultados dos estudantes envolvidos
 
-Python 3.13+ instalado
-MySQL Server instalado e configurado
-Git instalado para clonar o repositório
-Ambiente virtual configurado para Python (opcional, mas recomendado)
-Clonando o Repositório
-Abra um terminal e navegue até o diretório onde deseja clonar o repositório.
-Execute o seguinte comando para clonar o repositório:
-   git clone https://github.com/jeancosta4/patrimonio.git
-Entre no diretório do projeto:
-    cd nome-do-repositorio
-Instalando o Ambiente
-Configurando o Ambiente Virtual (Recomendado) Crie um ambiente virtual:
+# Índice
+* [Objetivo do Projeto](#objetivo-do-projeto)
+* [Equipe](#Equipe)
+* [Backlog do produto](#Product-Backlog)
+* [Competências desenvolvidas](#competências-desenvolvidas)
+* [Registro das Sprints](#Registro-das-Sprints)
 
-python -m venv venv
-Ative o ambiente virtual: 4.1 No Windows:
-venv\Scripts\activate
-4.2 No Linux/Mac:
 
-source venv/bin/activate
-Instalando as Dependências Instale as dependências do projeto:
-pip install -r requirements.txt
-Configuração do Banco de Dados
-Crie um banco de dados MySQL para o sistema: Execute o arquivo db_setup.sql no Mysql.
+# Projeto (API) 
+Projeto pedagógico alicerçado na Metodologia API para ensino-aprendizado focado no desenvolvimento de competências e fundamentada nos pilares de aprendizado com problemas reais (RPBL), validação externa e mentalidade ágil. 
+Uso de estratégias para entender o problema, conceber uma solução viável ao desenvolver e implementar o MVP seguido de sua operação (CDIO). 
+Os resultados dos projetos devem obedecer ao Aviso Legal disponível no site da Fatec SJC com definição das datas do kickoff e das sprint
 
-Inicie o servidor Flask:
-flask run
-Acesse o sistema no navegador: http://127.0.0.1:5000
+# Equipe
+|    Função     | Nome                                  |                                                                                                                                                      LinkedIn & GitHub                                                                                                                                                      |
+| :-----------: | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| Product Owner |   Aluno 1         |     [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)              |
+| Scrum Master  | Aluno 2 |      [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)     |
+| Team Member   | Aluno 3              |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)        |
+|  Team Member  | Aluno 4                 |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)        |
+|  Team Member  | Aluno 5                 |   [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)   |
+|  Team Member  | Aluno 6       |           [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)    
+
+
+# Objetivo do Projeto
+Este projeto tem como objetivo ajudar e facilitar na utilização da plataforma GitHub, visando:
+* Centralizar os trabalhos e projetos;
+* Organizar e estruturar as informações;
+* Versionar e controlar as alterações;
+* Facilitar o compartilhamento e feedback;
+* Desenvolver habilidades técnicas.
+
+
+## Tecnologias Utilizadas
+
+* Jira Software
+* Power BI
+* Microsoft Excel
+* Slack
+* Python (Colab)
+* Mysql
+
+
+
+# Product Backlog
+
+| Rank | Prioridade | User Story                                                                                                                                              | Estimativa | Sprint |
+|------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|------------|--------|
+| 1    | Alta       | Como síndico, quero abrir solicitações de vistoria predial para atender à legislação de meu município                                                    | 5          | 1      |
+| 2    | Alta       | Como atendente, quero gerenciar as solicitações de vistoria para agendar atendimento                                                                    | 8          | 1      |
+| 3    | Alta       | Como síndico, quero receber o laudo da vistoria predial para anexar ao processo de auditoria da prefeitura                                               | 5          | 2      |
+| ...  | Média      | ...                                                                                                                                                     | ...        | ...    |
+| 17   | Baixa      | Como atendente, quero um relatório de aniversários dos funcionários do condomínio que utilizam o sistema para enviar cartões acompanhados de brindes     | 2          | 3      |
+
+
+
+
+
+  
+# Registro das Sprints
+
+| Sprint            | Previsão   | Status   | Histórico |
+|-------------------|------------|----------|-----------|
+| 01                | dd/mm/aaaa | a fazer  | [MVP](MVP/sp1.md)  |
+| 02                | dd/mm/aaaa | a fazer  | [MVP](MVP/sp2.md)  |
+| 03                | dd/mm/aaaa | a fazer  | [MVP](MVP/sp3.md)  |
+| Feira de Soluções | dd/mm/aaaa | a fazer  | [MVP](#)  |
+
