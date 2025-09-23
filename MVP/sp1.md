@@ -1,4 +1,4 @@
-# 📌 MVP - [Nome do Projeto]
+# 📌 MVP - CASP
 
 ## 🎯 Objetivo do MVP
 
