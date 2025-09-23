@@ -1,9 +1,5 @@
-# Aprendizado por Projeto Integrado (API) - Template
-
-Template para os projetos de API, ensinando na utilização do repositório digital "GitHub". 
-
-Projeto baseado na metodologia ágil SCRUM, procurando desenvolver a Proatividade, Autonomia, Colaboração e Entrega de Resultados dos estudantes envolvidos
-
+# Cadastro e Administração de sistemas patrimoniais - CASP
+ 
 # Índice
 * [Objetivo do Projeto](#objetivo-do-projeto)
 * [Equipe](#Equipe)
@@ -12,51 +8,51 @@ Projeto baseado na metodologia ágil SCRUM, procurando desenvolver a Proatividad
 * [Registro das Sprints](#Registro-das-Sprints)
 
 
-# Projeto (API) 
-Projeto pedagógico alicerçado na Metodologia API para ensino-aprendizado focado no desenvolvimento de competências e fundamentada nos pilares de aprendizado com problemas reais (RPBL), validação externa e mentalidade ágil. 
-Uso de estratégias para entender o problema, conceber uma solução viável ao desenvolver e implementar o MVP seguido de sua operação (CDIO). 
-Os resultados dos projetos devem obedecer ao Aviso Legal disponível no site da Fatec SJC com definição das datas do kickoff e das sprint
+# Projeto (CASP) 
+Projeto inspirado na necessidade de cadastramento, alteração de patrimônios da Etec, visando maior facilidade e segurança de dados. Com isso, o CASP visa auxiliar a equipe gestora na administração e controle de bens da Etec.
+
 
 # Equipe
 |    Função     | Nome                                  |                                                                                                                                                      LinkedIn & GitHub                                                                                                                                                      |
 | :-----------: | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Product Owner |   Aluno 1         |     [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)              |
-| Scrum Master  | Aluno 2 |      [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)     |
-| Team Member   | Aluno 3              |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)        |
-|  Team Member  | Aluno 4                 |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)        |
-|  Team Member  | Aluno 5                 |   [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)   |
-|  Team Member  | Aluno 6       |           [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)    
+| Product Owner |   Victor Diniz Bento      |     [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/VictorDnzb)              |
+| Scrum Master  | Victor Gabriel de Souza |      [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)     |
+| Team Member   | Enzo Daniel Guedes |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/Enzo-Dan)        |
+|  Team Member  | Gustavo Soares Pimentel |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)        |
 
 
-# Objetivo do Projeto
-Este projeto tem como objetivo ajudar e facilitar na utilização da plataforma GitHub, visando:
-* Centralizar os trabalhos e projetos;
-* Organizar e estruturar as informações;
-* Versionar e controlar as alterações;
-* Facilitar o compartilhamento e feedback;
-* Desenvolver habilidades técnicas.
+
+# Objetivo do CASP
+Este projeto tem como objetivo ajudar e facilitar o cadastramento e alteração de patrimônios da ETEC, visando:
+* Cadastrar, alterar e consultar patrimônios;
+* Estruturar o banco de dados;
+* Garantir segurança e integridade dos dados;
+* Facilitar o gerenciamento de itens patrimôniais;
+* Desenvolver um.
 
 
 ## Tecnologias Utilizadas
 
-* Jira Software
-* Power BI
-* Microsoft Excel
-* Slack
-* Python (Colab)
-* Mysql
-
+* GitHub
+* MySql
+* Trello
+* Visual Studio Code
+* Python
+* Framework Flask
 
 
 # Product Backlog
 
 | Rank | Prioridade | User Story                                                                                                                                              | Estimativa | Sprint |
 |------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|------------|--------|
-| 1    | Alta       | Como síndico, quero abrir solicitações de vistoria predial para atender à legislação de meu município                                                    | 5          | 1      |
-| 2    | Alta       | Como atendente, quero gerenciar as solicitações de vistoria para agendar atendimento                                                                    | 8          | 1      |
-| 3    | Alta       | Como síndico, quero receber o laudo da vistoria predial para anexar ao processo de auditoria da prefeitura                                               | 5          | 2      |
-| ...  | Média      | ...                                                                                                                                                     | ...        | ...    |
-| 17   | Baixa      | Como atendente, quero um relatório de aniversários dos funcionários do condomínio que utilizam o sistema para enviar cartões acompanhados de brindes     | 2          | 3      |
+| 1    | Alta       | Como administrador, quero cadastrar bens patrimoniais, para que a escola tenha controle atualizado.                                                      | 7          | 1      |
+| 2    | Alta       | Como equipe gestora, quero editar informações de patrimônios já cadastrados para corrigir erros ou atualizar dados.                                      | 5          | 1      |
+| 3    | Alta       | Como equipe gestora, quero emitir relatórios em PDF/Excel para visualizar os bens cadastrados de forma organizada.                                       | 6          | 2      |
+| 4    | Média      | Como equipe gestora, quero pesquisar bens cadastrados por filtros (nome, código, local, status) para encontrar rapidamente o item desejado.              | 3          | 2      |
+| 5    | Média      | Como equipe gestora, quero controlar diferentes níveis de acesso (administrador, colaborador, gestor) para que cada perfil tenha permissões específicas. | 2          | 3      |
+| 6    | Baixa      | Como gestor, quero registrar movimentações de bens (transferência, manutenção, descarte) para rastrear o histórico de cada patrimônio.                   | 4          | 3      |
+| 7    | Baixa      | Como equipe gestora, quero anexar imagens aos bens cadastrados para melhor identificação.                                                                | 1          | 1      |
+| 8    | Baixa      | Como equipe gestora, quero acessar o sistema via login e senha para garantir segurança no acesso.                                                        | 4          | 1      |
 
 
 
@@ -67,8 +63,8 @@ Este projeto tem como objetivo ajudar e facilitar na utilização da plataforma 
 
 | Sprint            | Previsão   | Status   | Histórico |
 |-------------------|------------|----------|-----------|
-| 01                | dd/mm/aaaa | a fazer  | [MVP](MVP/sp1.md)  |
-| 02                | dd/mm/aaaa | a fazer  | [MVP](MVP/sp2.md)  |
-| 03                | dd/mm/aaaa | a fazer  | [MVP](MVP/sp3.md)  |
-| Feira de Soluções | dd/mm/aaaa | a fazer  | [MVP](#)  |
+| 01                | 02/04/2025 | Concluído| [MVP](MVP/sp1.md)  |
+| 02                | dd/mm/2025 | Concluído| [MVP](MVP/sp2.md)  |
+| 03                | dd/mm/2025 | Concluído| [MVP](MVP/sp3.md)  |
+| 04                | 22/09/2025 | Em andamento | [MVP](MVP./sp4.md)  |
 
