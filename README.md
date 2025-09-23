@@ -15,7 +15,7 @@ Projeto inspirado na necessidade de cadastramento, alteração de patrimônios d
 # Equipe
 |    Função     | Nome                                  |                                                                                                                                                      LinkedIn & GitHub                                                                                                                                                      |
 | :-----------: | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Product Owner |   Victor Diniz Bento      |     [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/VictorDnzb)              |
+| Product Owner |   Victor Diniz Bento      |     [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/victor-diniz-bento-674026314/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/VictorDnzb)              |
 | Scrum Master  | Victor Gabriel de Souza |      [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)     |
 | Team Member   | Enzo Daniel Guedes |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/Enzo-Dan)        |
 |  Team Member  | Gustavo Soares Pimentel |         [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/)        |
@@ -63,8 +63,8 @@ Este projeto tem como objetivo ajudar e facilitar o cadastramento e alteração 
 
 | Sprint            | Previsão   | Status   | Histórico |
 |-------------------|------------|----------|-----------|
-| 01                | 02/04/2025 | Concluído| [MVP](MVP/sp1.md)  |
-| 02                | dd/mm/2025 | Concluído| [MVP](MVP/sp2.md)  |
-| 03                | dd/mm/2025 | Concluído| [MVP](MVP/sp3.md)  |
+| 01                | 12/04/2025 | Concluído| [MVP](MVP/sp1.md)  |
+| 02                | 19/05/2025 | Concluído| [MVP](MVP/sp2.md)  |
+| 03                | 16/06/2025 | Concluído| [MVP](MVP/sp3.md)  |
 | 04                | 22/09/2025 | Em andamento | [MVP](MVP./sp4.md)  |
 
