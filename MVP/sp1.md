@@ -1,61 +1,60 @@
 # 📌 MVP - [Nome do Projeto]
 
 ## 🎯 Objetivo do MVP
-> Descrever de forma clara qual é o propósito do MVP:  
-- Qual problema resolve?  
-- Qual hipótese será validada?  
-- Qual valor será entregue ao usuário final?  
+
+-  O propósito do MVP é feito para organizar e explicar o que foi feito em cada sprint, de modo que os problemas sejam ouvidos, atendidos e resolvidos, com as informações necessárias em cada MVP. O problema resolvido nessa sprint será o principal do projeto, o cadastramento e alteração de patrimônios, a hipótese validada será que a digitalização do controle patrimonial reduzirá erros e inconsistências no cadastro dos bens, tornando o processo de registro mais ágil e confiável. O valor entregue no final será essas duas funções sendo executadas perfeitamente e atendendo os requisitos propostos pelo cliente.
 
 ---
 
 ## 📝 Descrição da Solução
-> Breve explicação do que será desenvolvido e entregue nesta etapa.  
-- Funcionalidades principais incluídas  
-- Limitações conhecidas  
-- Escopo reduzido (somente o essencial para validar a ideia)  
+
+- Nessa sprint inicial será desenvolvido a parte principal do projeto, que se baseia nas funcionalidades cadastrar e alterar patrimônios, visando que essas funcionalidades irão se limitar apenas para patrimônios presentes na Etec. Para aprovação do projeto, é necessário aprovação do mentor Jean Carlos Lourenço Costa e da cliente Renata.
 
 ---
 
 ## 👥 Personas / Usuários-Alvo
-- **Persona 1:** breve descrição, necessidades e dores atendidas  
-- **Persona 2:** breve descrição, necessidades e dores atendidas  
+
+- **Renata:** Renata é responsável pela equipe administrativa da Etec, sendo a principal proprietária do sistema web CASP, sua necessidade era de poder implementar os patrimônios no sistema, estes que estavam em uma planilha no excel. 
+ 
 
 ---
 
 ## 🔑 User Stories (Backlog do MVP)
 | ID  | User Story                                                                 | Prioridade | Estimativa |
 |-----|-----------------------------------------------------------------------------|------------|------------|
-| US1 | Como [tipo de usuário], quero [objetivo] para [benefício esperado].         | Alta       | 5 pontos   |
-| US2 | Como [tipo de usuário], quero [objetivo] para [benefício esperado].         | Média      | 3 pontos   |
+| US1 | Como administrador, quero cadastrar patrimônios para organizar os dados patrimoniais.         | Alta       | 5 pontos   |
+| US2 | Como administrador, quero alterar patrimônios para corrigir possíveis erros de cadastramento. | Alta       | 4 pontos   |
 
 ---
 
 ## 📅 Sprint(s) Relacionadas
 | Sprint | Entregas Principais                          | Status   |
 |--------|----------------------------------------------|----------|
-| 01     | [Funcionalidade X, Y]                        | Concluído|
-| 02     | [Funcionalidade Z]                           | Em andamento |
+| 01     | Cadastramento                   | Concluído|
+| 02     | Alteração                       | Em andamento |
 
 ---
 
 ## 📊 Critérios de Aceitação
-- O MVP deve permitir que o usuário [ação principal]  
-- O sistema deve registrar [evento importante]  
-- Métricas coletadas: [exemplo: tempo de resposta, taxa de uso]  
+- O MVP deve permitir que a equipe gestora cadastre e altere patrimônios.
+- O sistema deve registrar patrimônios. 
+- Métricas coletadas: O tempo de resposta para cadastramento é de menos de 2 segundos, sendo o mesmo para a alteração de um patrimônio.
 
 ---
 
 ## 📈 Métricas de Validação
-- Número de usuários que testaram o MVP  
-- Feedback qualitativo (positivo/negativo)  
-- Indicadores de negócio (exemplo: % de adesão, redução de custo, etc.)  
+- Número de usuários que testaram o MVP
+- 1 usuário, apenas a Renata.
+- Feedback qualitativo (positivo/negativo)
+- Positivo
+- Indicadores de negócio (Feedback e aprovação do mentor Jean Costa e cliente Renata)
 
 ---
 
 ## 🚀 Próximos Passos
-- Melhorias planejadas após feedback  
-- Ajustes de usabilidade  
-- Expansão de funcionalidades para próximo incremento  
+- Implementação de relatórios
+- Login e níveis de acesso
+- Criação de filtros
 
 ---
 
