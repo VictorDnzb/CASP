@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastro de Patrimônio{% endblock %}
+
+{% block content %}
+<div class="grid-cadastro-layout">
+   <form action="{{ url_for('cadastrar') }}" method="post" enctype="multipart/form-data">
+        <h1>Cadastrar Patrimônio</h1>
+
+        <div class="form-group">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="descricao" required>
+        </div>
+
+        <div class="form-group">
+            <label for="localizacao">Localização:</label>
+            <input type="text" id="localizacao" name="localizacao" required>
+        </div>
+
+        <div class="form-group">
+            <label for="marca">Marca:</label>
+            <input type="text" name="marca" required>
+        </div>
+
+        <div class="form-group">
+            <label for="codigo_doador">Código do Doador:</label>
+            <input type="text" name="codigo_doador">
+        </div>
+
+        <div class="form-group">
+            <label for="codigo_cps">Código do CPS:</label>
+            <input type="text" name="codigo_cps">
+        </div>
+
+        <div class="form-group">
+            <label for="condicao">Condição:</label>
+            <select id="condicao" name="condicao" required>
+                <option value="">Selecione...</option>
+                <option value="Ótimo">Ótimo</option>
+                <option value="Bom">Bom</option>
+                <option value="Recuperável">Recuperável</option>
+                <option value="Péssimo">Péssimo</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="origem">Origem:</label>
+            <select id="origem" name="origem" required>
+                <option value="">Selecione...</option>
+                <option value="Etec">Etec</option>
+                <option value="Doação">Doação</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="quantidade">Quantidade:</label>
+            <input type="number" name="quantidade" value="1" min="1">
+        </div>
+
+        <div class="form-group">
+            <label for="imagem">Imagem do Patrimônio:</label>
+            <input type="file" id="imagem" name="imagem" accept="image/*">
+        </div>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+</div>
+{% endblock %}
