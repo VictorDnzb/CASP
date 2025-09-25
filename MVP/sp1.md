@@ -48,9 +48,8 @@
 ---
 
 ## 🚀 Próximos Passos
-- Implementação de relatórios
-- Login e níveis de acesso
-- Criação de filtros
+
+- Os próximos passos serão a implementação de relatórios, login e níves de acesso, e a criação de filtros, itens que serão implementados futuramente nas próximas sprints.
 
 ---
 
