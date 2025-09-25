@@ -29,8 +29,8 @@
 ## 📅 Sprint(s) Relacionadas
 | Sprint | Entregas Principais                          | Status   |
 |--------|----------------------------------------------|----------|
-| 01     | Importação de dados                      | Concluído|
-| 02     | Relatórios                          | Concluído |
+| 03     | Importação de dados                      | Concluído|
+| 03     | Relatórios                          | Concluído |
 
 ---
 
@@ -47,9 +47,7 @@
 ---
 
 ## 🚀 Próximos Passos
-- Melhorias planejadas após feedback  
-- Ajustes de usabilidade  
-- Expansão de funcionalidades para próximo incremento
+
 - Os próximos, serão a implementação de opções para o patrimônio como obsoleto ou indeterminado, para maior variedade e conhecimento do real estado para os patrimônios, ou seja, a expansão de funcionalidades e ajuste de usabilidade.
 
 ---
