@@ -24,11 +24,11 @@ Projeto inspirado na necessidade de cadastramento, alteração de patrimônios d
 
 # Objetivo do CASP
 Este projeto tem como objetivo ajudar e facilitar o cadastramento e alteração de patrimônios da ETEC, visando:
+* Criar um sistema web responsivo;
 * Cadastrar, alterar e consultar patrimônios;
 * Estruturar o banco de dados;
 * Garantir segurança e integridade dos dados;
 * Facilitar o gerenciamento de itens patrimôniais;
-* Desenvolver um.
 
 
 ## Tecnologias Utilizadas
