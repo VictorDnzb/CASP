@@ -21,7 +21,7 @@
 ## 🔑 User Stories (Backlog do MVP)
 | ID  | User Story                                                                 | Prioridade | Estimativa |
 |-----|-----------------------------------------------------------------------------|------------|------------|
-| US1 | Como equipe gestora, quero que o sistema possua login para obter melhor segurança dos dados. | Alta    | 5 pontos |
+| US1 | Como equipe gestora, quero que o sistema possua login para obter melhor segurança dos dados. | Baixa    | 2 pontos |
 | US2 | Como equipe gestora, quero que o sistema possua filtragem para busca de patrimônios.  | Média          | 3 pontos   |
 
 ---
@@ -29,7 +29,7 @@
 ## 📅 Sprint(s) Relacionadas
 | Sprint | Entregas Principais                          | Status   |
 |--------|----------------------------------------------|----------|
-| 01     | Login                                        | Concluído |
+| 02     | Login                                        | Concluído |
 | 02     | Filtragem de busca                           | Concluído |
 
 ---
