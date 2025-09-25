@@ -1,10 +1,7 @@
 # 📌 MVP - CASP
 
 ## 🎯 Objetivo do MVP
-> Descrever de forma clara qual é o propósito do MVP:  
-- Qual problema resolve?  
-- Qual hipótese será validada?  
-- Qual valor será entregue ao usuário final?
+
 - O Sprint 3 foi feito para resolver a problemática da importação de dados, criação de relatórios e cores do site, onde o nosso cliente possuia dados de patrimônios em uma planilha de Excel e esses dados foram passados para o sistema web e foram armazenados, a hipótese validada foi a de que um sistema web facilita e deixa mais acessível o acesso aos dados e a sua organizção. O valor entregue ao usuário final seria um relatório com informações dos patrimônios, importação de dados através de planilhas do Excel e organização das cores analogas ao site da Etec oficial.
 
 ---
@@ -25,7 +22,7 @@
 | ID  | User Story                                                                 | Prioridade | Estimativa |
 |-----|-----------------------------------------------------------------------------|------------|------------|
 | US1 | Como equipe gestora, quero poder importar dados de uma planilha para o sistema para maior agilidade em levar os itens feitos à mão para o sistema digital.         | Alta       | 6 pontos   |
-| US2 | Como equipe gestora, quero poder gerar relatórios para obter todas as informações dos dados patrimoniais cadastrados ou alterados.         | Média      | 3 pontos   |
+| US2 | Como equipe gestora, quero poder gerar relatórios para obter todas as informações dos dados patrimoniais cadastrados ou alterados.         | Alta      | 5 pontos   |
 
 ---
 
@@ -38,23 +35,22 @@
 ---
 
 ## 📊 Critérios de Aceitação
-- O MVP deve permitir que o usuário [ação principal]  
-- O sistema deve registrar [evento importante]  
-- Métricas coletadas: [exemplo: tempo de resposta, taxa de uso]  
+
+- O MVP deve permitir que a equipe gestora possa importar os dados de outras planilhas e a criação de relatórios, onde o sistema deve registrar esses dados nos relatórios e importar os dados obtidos, a métrica coletada foram os dados que estão nos relatórios, como o nome, descrição, código e entre outros. E os dados que foram importados para o sistema.
 
 ---
 
 ## 📈 Métricas de Validação
-- Número de usuários que testaram o MVP  
-- Feedback qualitativo (positivo/negativo)  
-- Indicadores de negócio (exemplo: % de adesão, redução de custo, etc.)  
+
+- Os usuários que testaram o MVP foram a cliente Renata, seu feeedback foi positivo e ela já possui mais de 600 patrimônios cadastrados no site.
 
 ---
 
 ## 🚀 Próximos Passos
 - Melhorias planejadas após feedback  
 - Ajustes de usabilidade  
-- Expansão de funcionalidades para próximo incremento  
+- Expansão de funcionalidades para próximo incremento
+- Os próximos, serão a implementação de opções para o patrimônio como obsoleto ou indeterminado, para maior variedade e conhecimento do real estado para os patrimônios, ou seja, a expansão de funcionalidades e ajuste de usabilidade.
 
 ---
 
