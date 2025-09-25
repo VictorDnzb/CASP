@@ -31,23 +31,19 @@
 | Sprint | Entregas Principais                          | Status   |
 |--------|----------------------------------------------|----------|
 | 01     | Cadastramento                   | Concluído|
-| 02     | Alteração                       | Em andamento |
+| 02     | Alteração                       | Concluído |
 
 ---
 
 ## 📊 Critérios de Aceitação
-- O MVP deve permitir que a equipe gestora cadastre e altere patrimônios.
-- O sistema deve registrar patrimônios. 
-- Métricas coletadas: O tempo de resposta para cadastramento é de menos de 2 segundos, sendo o mesmo para a alteração de um patrimônio.
+
+- O MVP deve permitir que a equipe gestora cadastre e altere patrimônios, de modo que os patrimônios fiquem registrados no banco e possam ser alterados, as métricas coletadas foram a quantidade de dados coletados dos patrimônios e a sua velocidade de cadastramento e alteração, que é menos de 2 segundos.
 
 ---
 
 ## 📈 Métricas de Validação
-- Número de usuários que testaram o MVP
-- 1 usuário, apenas a Renata.
-- Feedback qualitativo (positivo/negativo)
-- Positivo
-- Indicadores de negócio (Feedback e aprovação do mentor Jean Costa e cliente Renata)
+
+- A cliente Renata testou o sistema e aprovou ambas funcionalidades, forneceu um feedback positivo com relação a praticidade e velocidade do site, a aprovação da sprint veio através da nossa própria cliente e do nosso mentor Jean
 
 ---
 
@@ -59,5 +55,7 @@
 ---
 
 ## 📂 Anexos / Evidências
-<img width="816" height="844" alt="image" src="https://github.com/user-attachments/assets/de6a3131-ed37-42de-9fa2-4a47aa75bb62" />
+<img width="828" height="445" alt="image" src="https://github.com/user-attachments/assets/c3e59bf1-b232-414e-ad82-5532c236fc9c" />
+<img width="828" height="441" alt="image" src="https://github.com/user-attachments/assets/e9d2a620-91ce-4d04-80fd-f0cd831dcc48" />
+<img width="828" height="444" alt="image" src="https://github.com/user-attachments/assets/6860e417-2497-48a9-a464-9aafb7ad8c81" />
 
