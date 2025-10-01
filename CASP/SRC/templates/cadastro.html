@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Patrimônio - Sistema de Patrimônio Escolar{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Cadastrar Novo Patrimônio
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for("cadastrar") }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nome" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>
+                                    Nome do Patrimônio *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="nome" 
+                                       name="nome" 
+                                       placeholder="Ex: Computador Dell Inspiron"
+                                       required
+                                       maxlength="100">
+                                <div class="invalid-feedback">
+                                    Por favor, informe o nome do patrimônio.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="quantidade" class="form-label">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    Quantidade *
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="quantidade" 
+                                       name="quantidade" 
+                                       value="1"
+                                       min="1"
+                                       required>
+                                <div class="invalid-feedback">
+                                    A quantidade deve ser maior que zero.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>
+                                Descrição *
+                            </label>
+                            <textarea class="form-control" 
+                                      id="descricao" 
+                                      name="descricao" 
+                                      rows="3"
+                                      placeholder="Descreva as características do patrimônio..."
+                                      required></textarea>
+                            <div class="invalid-feedback">
+                                Por favor, informe a descrição do patrimônio.
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="localizacao" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    Localização *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="localizacao" 
+                                       name="localizacao" 
+                                       placeholder="Ex: Sala de Informática"
+                                       required
+                                       maxlength="100">
+                                <div class="invalid-feedback">
+                                    Por favor, informe a localização.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="condicao" class="form-label">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Condição *
+                                </label>
+                                <select class="form-select" id="condicao" name="condicao" required>
+                                    <option value="">Selecione a condição</option>
+                                    <option value="Òtimo">Òtimo</option>
+                                    <option value="Bom">Bom</option>
+                                    <option value="Recuperável">Recuperável</option>
+                                    <option value="Péssimo">Péssimo</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, selecione a condição.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="origem" class="form-label">
+                                    <i class="fas fa-source me-1"></i>
+                                    Origem 
+                                </label>
+                                <select class="form-select" id="origem" name="origem" required>
+                                    <option value="">Selecione a origem</option>
+                                    <option value="Compra">CPS</option>
+                                    <option value="Doação">Doação</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor, selecione a origem.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="marca" class="form-label">
+                                    <i class="fas fa-industry me-1"></i>
+                                    Marca
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="marca" 
+                                       name="marca" 
+                                       placeholder="Ex: Dell, HP, Samsung"
+                                       maxlength="100">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="codigo_doador" class="form-label">
+                                    <i class="fas fa-barcode me-1"></i>
+                                    Código do Doador
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="codigo_doador" 
+                                       name="codigo_doador" 
+                                       placeholder="Código fornecido pelo doador"
+                                       maxlength="100">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="codigo_cps" class="form-label">
+                                    <i class="fas fa-qrcode me-1"></i>
+                                    Código CPS
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="codigo_cps" 
+                                       name="codigo_cps" 
+                                       placeholder="Código interno CPS"
+                                       maxlength="100">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="imagem" class="form-label">
+                                <i class="fas fa-camera me-1"></i>
+                                Imagem do Patrimônio
+                            </label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="imagem" 
+                                   name="imagem" 
+                                   accept="image/*">
+                            <div class="form-text">
+                                Formatos aceitos: PNG, JPG, JPEG, GIF, WEBP (máx. 16MB)
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('listar') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Cadastrar Patrimônio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        if (form.checkValidity()) {
+            submitBtn.innerHTML = '<span class="loading"></span> Cadastrando...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    const nomeInput = document.getElementById('nome');
+    if (nomeInput) {
+        nomeInput.focus();
+    }
+    
+    const condicaoSelect = document.getElementById('condicao');
+    condicaoSelect.addEventListener('change', function() {
+        const badge = document.getElementById('condicao-badge');
+        if (badge) badge.remove();
+        
+        if (this.value) {
+            const newBadge = document.createElement('span');
+            newBadge.id = 'condicao-badge';
+            newBadge.className = `badge ms-2 ${getCondicaoClass(this.value)}`;
+            newBadge.textContent = this.value;
+            this.parentNode.appendChild(newBadge);
+        }
+    });
+    
+function getCondicaoClass(condicao) {
+    switch(condicao) {
+        case 'Ótimo': return 'bg-success';
+        case 'Bom': return 'bg-primary';
+        case 'Recuperável': return 'bg-warning';
+        case 'Péssimo': return 'bg-danger';
+        default: return 'bg-secondary';
+    }
+}
+    
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

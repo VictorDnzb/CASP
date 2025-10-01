@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Consulta Patrimônio">
+    <meta name="description" content="App de consulta de patrimônio escolar">
+    
+    <title>Consulta Patrimônio</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+             --primary-color: #B20000;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+        }
+        
+        body {
+            background: #005C6D;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo-section {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem 1rem;
+        }
+        
+        .input-group-custom .form-control {
+            border-right: none;
+            padding: 1rem;
+        }
+        
+        .input-group-custom .btn {
+            border-left: none;
+            background: white;
+        }
+        
+        .result-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .result-card.error {
+            border-left-color: var(--danger-color);
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .history-item {
+            border-left: 3px solid var(--primary-color);
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+        }
+        
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Loading */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container py-3">
+        <!-- Cabeçalho -->
+        <div class="logo-section text-center mb-4">
+            <i class="fas fa-school fa-3x mb-3"></i>
+            <h1 class="h4 mb-1">Sistema de Patrimônio</h1>
+            <p class="mb-0 opacity-75">Consulta Mobile</p>
+        </div>
+
+        <!-- Card Principal -->
+        <div class="card main-card mb-4">
+            <div class="card-body">
+                <!-- Formulário de Consulta -->
+                <form id="consultaForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-barcode me-2"></i>Código do Patrimônio
+                        </label>
+                        <div class="input-group input-group-custom">
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="codigoInput" 
+                                   placeholder="Digite o código CPS ou doador"
+                                   required
+                                   autocomplete="off">
+                            <button class="btn btn-outline-secondary" type="button" id="clearBtn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Digite o código CPS (número) ou código do doador
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-lg" id="consultarBtn">
+                        <i class="fas fa-search me-2"></i>
+                        <span id="btnText">Consultar Patrimônio</span>
+                        <div id="btnLoading" class="spinner-border spinner-border-sm ms-2" style="display: none;"></div>
+                    </button>
+                </form>
+
+                <!-- Status do Servidor -->
+                <div class="mt-3 text-center">
+                    <small class="text-muted" id="serverStatus">
+                        <i class="fas fa-circle text-success me-1"></i>
+                        Verificando servidor...
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultado da Consulta -->
+        <div id="resultadoContainer" style="display: none;">
+            <!-- Resultado será inserido aqui via JavaScript -->
+        </div>
+
+        <!-- Histórico de Consultas -->
+        <div class="card main-card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Últimas Consultas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="historicoConsultas">
+                    <p class="text-muted text-center mb-0">Nenhuma consulta realizada</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Flutuante para Scanner -->
+    <button class="btn btn-success floating-btn" id="scannerBtn" title="Escanear QR Code">
+        <i class="fas fa-camera"></i>
+    </button>
+
+    <script>
+        // Configurações
+        const API_BASE = window.location.origin;
+        let historico = JSON.parse(localStorage.getItem('historicoConsultas') || '[]');
+
+        // Elementos DOM
+        const form = document.getElementById('consultaForm');
+        const codigoInput = document.getElementById('codigoInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const consultarBtn = document.getElementById('consultarBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const resultadoContainer = document.getElementById('resultadoContainer');
+        const historicoDiv = document.getElementById('historicoConsultas');
+        const serverStatus = document.getElementById('serverStatus');
+        const scannerBtn = document.getElementById('scannerBtn');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarStatusServidor();
+            atualizarHistorico();
+            codigoInput.focus();
+        });
+
+        // Verificar status do servidor
+        async function verificarStatusServidor() {
+            try {
+                const response = await fetch(`${API_BASE}/api/status`);
+                const data = await response.json();
+                
+                serverStatus.innerHTML = `
+                    <i class="fas fa-circle text-success me-1"></i>
+                    Online - ${data.timestamp}
+                `;
+            } catch (error) {
+                serverStatus.innerHTML = `
+                    <i class="fas fa-circle text-danger me-1"></i>
+                    Servidor offline
+                `;
+            }
+        }
+
+        // Atualizar histórico na tela
+        function atualizarHistorico() {
+            if (historico.length === 0) {
+                historicoDiv.innerHTML = '<p class="text-muted text-center mb-0">Nenhuma consulta realizada</p>';
+                return;
+            }
+
+            const html = historico.slice(-5).reverse().map(item => `
+                <div class="history-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>${item.codigo}</strong>
+                        <span class="badge ${item.encontrado ? 'bg-success' : 'bg-secondary'}">
+                            ${item.encontrado ? 'Encontrado' : 'Não encontrado'}
+                        </span>
+                    </div>
+                    <small class="text-muted">${item.data}</small>
+                </div>
+            `).join('');
+
+            historicoDiv.innerHTML = html;
+        }
+
+        // Adicionar ao histórico
+        function adicionarHistorico(codigo, encontrado) {
+            const novaConsulta = {
+                codigo: codigo,
+                encontrado: encontrado,
+                data: new Date().toLocaleString('pt-BR')
+            };
+            
+            historico.push(novaConsulta);
+            historico = historico.slice(-10); // Manter apenas últimas 10
+            localStorage.setItem('historicoConsultas', JSON.stringify(historico));
+            atualizarHistorico();
+        }
+
+        // Limpar campo
+        clearBtn.addEventListener('click', function() {
+            codigoInput.value = '';
+            codigoInput.focus();
+            resultadoContainer.style.display = 'none';
+        });
+
+        // Consultar patrimônio
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const codigo = codigoInput.value.trim();
+            if (!codigo) return;
+
+            // Mostrar loading
+            btnText.textContent = 'Consultando...';
+            btnLoading.style.display = 'inline-block';
+            consultarBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/patrimonio/${codigo}`);
+                const data = await response.json();
+
+                mostrarResultado(data, codigo);
+                adicionarHistorico(codigo, data.encontrado);
+
+            } catch (error) {
+                mostrarErro('Erro de conexão com o servidor');
+            } finally {
+                // Restaurar botão
+                btnText.textContent = 'Consultar Patrimônio';
+                btnLoading.style.display = 'none';
+                consultarBtn.disabled = false;
+            }
+        });
+
+        // Mostrar resultado na tela
+        function mostrarResultado(data, codigo) {
+            if (data.success && data.encontrado) {
+                const patrimonio = data.patrimonio;
+                
+                resultadoContainer.innerHTML = `
+                    <div class="card main-card fade-in">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-check-circle me-2"></i>Patrimônio Encontrado
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <strong>Nome:</strong> ${patrimonio.nome}
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Local:</strong> ${patrimonio.localizacao}
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Condição:</strong> 
+                                    <span class="badge ${getBadgeClass(patrimonio.condicao)}">
+                                        ${patrimonio.condicao}
+                                    </span>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Origem:</strong> ${patrimonio.origem}
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Quantidade:</strong> ${patrimonio.quantidade}
+                                </div>
+                                ${patrimonio.marca ? `
+                                <div class="col-12 mb-2">
+                                    <strong>Marca:</strong> ${patrimonio.marca}
+                                </div>` : ''}
+                                <div class="col-12">
+                                    <strong>Data Cadastro:</strong> ${patrimonio.data_cadastro_formatada}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } else {
+                resultadoContainer.innerHTML = `
+                    <div class="card main-card fade-in result-card error">
+                        <div class="card-body text-center">
+                            <i class="fas fa-times-circle fa-2x text-danger mb-3"></i>
+                            <h5>Patrimônio Não Encontrado</h5>
+                            <p class="text-muted">Código: <strong>${codigo}</strong></p>
+                            <p>${data.mensagem || 'Verifique o código e tente novamente'}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultadoContainer.style.display = 'block';
+            resultadoContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Mostrar erro
+        function mostrarErro(mensagem) {
+            resultadoContainer.innerHTML = `
+                <div class="card main-card fade-in result-card error">
+                    <div class="card-body text-center">
+                        <i class="fas fa-wifi fa-2x text-danger mb-3"></i>
+                        <h5>Erro de Conexão</h5>
+                        <p class="text-muted">${mensagem}</p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="verificarStatusServidor()">
+                            <i class="fas fa-redo me-1"></i>Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            `;
+            resultadoContainer.style.display = 'block';
+        }
+
+        // Classe do badge baseada na condição
+        function getBadgeClass(condicao) {
+            const classes = {
+                'Ótimo': 'bg-success',
+                'Bom': 'bg-primary',
+                'Recuperável': 'bg-warning',
+                'Péssimo': 'bg-danger'
+            };
+            return classes[condicao] || 'bg-secondary';
+        }
+
+        // Scanner QR Code (placeholder)
+        scannerBtn.addEventListener('click', function() {
+            alert('Funcionalidade de scanner será implementada em breve!');
+            // Futura integração com library de QR Code
+        });
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + K para focar no campo de busca
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                codigoInput.focus();
+            }
+            // ESC para limpar
+            if (e.key === 'Escape') {
+                codigoInput.value = '';
+                resultadoContainer.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
