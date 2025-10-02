@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}Listar Patrimônios - Sistema de Patrimônio Escolar{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-gradient mb-0">
+                Patrimônios Cadastrados
+            </h1>
+            <p class="text-muted">Gerencie todos os patrimônios da escola</p>
+        </div>
+    </div>
+    
+    <div class="filter-section">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="nome" 
+                       name="nome" 
+                       value="{{ filtro.nome or '' }}"
+                       placeholder="Buscar por nome">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="localizacao" class="form-label">Localização</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="localizacao" 
+                       name="localizacao" 
+                       value="{{ filtro.localizacao or '' }}"
+                       placeholder="Buscar por localização">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="condicao" class="form-label">Condição</label>
+                <select class="form-select" id="condicao" name="condicao">
+                    <option value="">Todas</option>
+                    <option value="Ótimo" {% if filtro.condicao == 'Ótimo' %}selected{% endif %}>Ótimo</option>
+                    <option value="Bom" {% if filtro.condicao == 'Bom' %}selected{% endif %}>Bom</option>
+                    <option value="Recuperável" {% if filtro.condicao == 'Recuperável' %}selected{% endif %}>Recuperável</option>
+                    <option value="Péssimo" {% if filtro.condicao == 'Péssimo' %}selected{% endif %}>Péssimo</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="origem" class="form-label">Origem</label>
+                <select class="form-select" id="origem" name="origem">
+                    <option value="">Todas</option>
+                    <option value="CPS" {% if filtro.origem == 'CPS' %}selected{% endif %}>CPS</option>
+                    <option value="Doação" {% if filtro.origem == 'Doação' %}selected{% endif %}>Doação</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <a href="{{ url_for('listar') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>
+                Lista de Patrimônios 
+                <span class="badge bg-primary ms-2">{{ patrimonios|length }} itens</span>
+            </h5>
+            <div class="btn-group">
+                <a href="{{ url_for('cadastro') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>
+                    Novo Patrimônio
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            {% if patrimonios %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Nome</th>
+                            <th>Localização</th>
+                            <th>Condição</th>
+                            <th>Quantidade</th>
+                            <th>Origem</th>
+                            <th>Data Cadastro</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        {% for patrimonio in patrimonios %}
+                        <tr class="patrimonio-row {% if loop.index > 5 %}hidden{% endif %}" data-index="{{ loop.index }}">
+                            <td>
+                                {% if patrimonio.imagem %}
+                                <img src="{{ url_for('servir_imagem', filename=patrimonio.imagem) }}" 
+                                     alt="Imagem do patrimônio" 
+                                     class="rounded"
+                                     style="width: 50px; height: 50px; object-fit: cover;"
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal{{ patrimonio.id }}"
+                                     role="button">
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ patrimonio.nome }}</strong>
+                                {% if patrimonio.marca %}
+                                <br><small class="text-muted">{{ patrimonio.marca }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ patrimonio.localizacao }}</td>
+                            <td>
+                                <span class="badge {% if patrimonio.condicao == 'Ótimo' %}bg-success{% elif patrimonio.condicao == 'Bom' %}bg-primary{% elif patrimonio.condicao == 'Recuperável' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ patrimonio.condicao }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info">{{ patrimonio.quantidade }}</span>
+                            </td>
+                            <td>{{ patrimonio.origem }}</td>
+                            <td>
+                                {% if patrimonio.data_cadastro %}
+                                {{ patrimonio.data_cadastro.strftime('%d/%m/%Y') }}
+                                {% endif %}
+                            </td>
+                            
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('editar_patrimonio', id=patrimonio.id) }}" 
+                                       class="btn btn-outline-primary"
+                                       data-bs-toggle="tooltip"
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        {% if patrimonio.imagem %}
+                        <div class="modal fade" id="imageModal{{ patrimonio.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ patrimonio.nome }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="{{ url_for('servir_imagem', filename=patrimonio.imagem) }}" 
+                                             alt="Imagem do patrimônio" 
+                                             class="img-fluid rounded">
+                                        <div class="mt-3">
+                                            <p><strong>Descrição:</strong> {{ patrimonio.descricao }}</p>
+                                            <p><strong>Localização:</strong> {{ patrimonio.localizacao }}</p>
+                                            <p><strong>Condição:</strong> {{ patrimonio.condicao }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if patrimonios|length > 5 %}
+                <div class="text-center py-4" id="botoes-controle">
+                    <button id="ver-mais-btn" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-chevron-down me-2"></i>
+                        Ver Mais ({{ patrimonios|length - 5 }})
+                    </button>
+                    <button id="ver-menos-btn" class="btn btn-outline-secondary btn-lg" style="display: none;">
+                        <i class="fas fa-chevron-up me-2"></i>
+                        Ver Menos
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Nenhum patrimônio encontrado</h4>
+                <p class="text-muted">
+                    {% if filtro.nome or filtro.localizacao or filtro.condicao or filtro.origem %}
+                    Tente ajustar os filtros de busca ou 
+                    <a href="{{ url_for('listar') }}" class="text-decoration-none">limpar filtros</a>
+                    {% else %}
+                    Comece cadastrando o primeiro patrimônio
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('cadastro') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Cadastrar Primeiro Patrimônio
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Busca com Enter
+    const searchInputs = document.querySelectorAll('input[type="text"]');
+    searchInputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.closest('form').submit();
+            }
+        });
+    });
+
+    // Elementos de controle
+    const verMaisBtn = document.getElementById('ver-mais-btn');
+    const verMenosBtn = document.getElementById('ver-menos-btn');
+    const todosPatrimonios = document.querySelectorAll('.patrimonio-row');
+    const LIMITE_INICIAL = 5;
+
+    // Função para mostrar mais itens
+    function mostrarMais() {
+        todosPatrimonios.forEach(row => {
+            row.classList.remove('hidden');
+            if (parseInt(row.dataset.index) > LIMITE_INICIAL) {
+                row.classList.add('fade-in');
+            }
+        });
+        
+        if (verMaisBtn) verMaisBtn.style.display = 'none';
+        if (verMenosBtn) verMenosBtn.style.display = 'inline-block';
+    }
+
+    // Função para mostrar menos itens
+    function mostrarMenos() {
+        todosPatrimonios.forEach(row => {
+            if (parseInt(row.dataset.index) > LIMITE_INICIAL) {
+                row.classList.add('hidden');
+                row.classList.remove('fade-in');
+            }
+        });
+        
+        if (verMaisBtn) verMaisBtn.style.display = 'inline-block';
+        if (verMenosBtn) verMenosBtn.style.display = 'none';
+        
+        // Scroll suave para o topo da tabela
+        document.querySelector('table').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }
+
+    // Event listeners
+    if (verMaisBtn) {
+        verMaisBtn.addEventListener('click', mostrarMais);
+    }
+
+    if (verMenosBtn) {
+        verMenosBtn.addEventListener('click', mostrarMenos);
+    }
+
+    // Animações de entrada para os primeiros itens
+    const primeirasLinhas = document.querySelectorAll('.patrimonio-row:not(.hidden)');
+    primeirasLinhas.forEach((row, index) => {
+        setTimeout(() => {
+            row.classList.add('fade-in');
+        }, index * 100);
+    });
+
+    // Tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', function(e) {
+        // ESC para ver menos
+        if (e.key === 'Escape' && verMenosBtn.style.display !== 'none') {
+            mostrarMenos();
+        }
+        // Espaço para ver mais/alternar
+        if (e.key === ' ' && !e.target.matches('input, textarea, select')) {
+            e.preventDefault();
+            if (verMaisBtn.style.display !== 'none') {
+                mostrarMais();
+            } else {
+                mostrarMenos();
+            }
+        }
+    });
+});
+
+// CSS para animações e estilos
+const style = document.createElement('style');
+style.textContent = `
+    .hidden {
+        display: none;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
+    #ver-mais-btn, #ver-menos-btn {
+        transition: all 0.3s ease;
+        min-width: 150px;
+    }
+    
+    #ver-mais-btn:hover, #ver-menos-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    #botoes-controle {
+        background: linear-gradient(to bottom, rgba(248,249,250,0.9) 0%, rgba(248,249,250,1) 100%);
+        border-top: 1px solid #dee2e6;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+    }
+    
+    .table-responsive {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    /* Efeito de destaque nas linhas quando aparecem */
+    .patrimonio-row.fade-in {
+        background-color: rgba(13, 110, 253, 0.02);
+        transition: background-color 1s ease;
+    }
+    
+    .patrimonio-row.fade-in:nth-child(even) {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
