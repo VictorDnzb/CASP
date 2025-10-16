@@ -14,129 +14,13 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 import unicodedata
 import requests
-import json
-import time
-
-# Configuração simplificada do ChatBot
-class PatrimonioChatBot:
-    def __init__(self):
-        self.respostas = self.carregar_respostas()
-        print("✅ ChatBot de Patrimônio inicializado!")
-    
-    def carregar_respostas(self):
-        return {
-            
-            "oi": "Olá! Sou seu assistente de patrimônio escolar. Como posso ajudar?",
-            "olá": "Olá! Em que posso ser útil hoje?",
-            "ola": "Olá! Sou o assistente do sistema de patrimônio.",
-            "bom dia": "Bom dia! Como posso ajudá-lo com o sistema de patrimônio?",
-            "boa tarde": "Boa tarde! Estou aqui para ajudar com o cadastro e gestão de patrimônios.",
-            "boa noite": "Boa noite! Em que posso ser útil?",
-            
-            
-            "como cadastrar": "Para cadastrar um patrimônio: 1) Acesse 'Cadastrar Patrimônio' 2) Preencha nome, descrição, localização, condição e origem 3) Códigos doador/CPS devem ter 7 números 4) Clique em Salvar",
-            "cadastrar patrimônio": "Vá em 'Cadastrar Patrimônio' no menu. Campos obrigatórios: nome, descrição, localização, condição, origem.",
-            "como fazer cadastro": "Use o menu 'Cadastrar Patrimônio'. Preencha todos os campos marcados com * e clique em Salvar.",
-            
-            "gerar relatório": "Clique em 'Relatório PDF' no dashboard para gerar um relatório completo com todos os patrimônios.",
-            "relatório pdf": "Acesse o dashboard e clique no botão 'Relatório PDF' para baixar o documento em PDF.",
-            "como gerar relatório": "No dashboard, clique em 'Relatório PDF'. O sistema criará um documento organizado com todos os patrimônios.",
-            
-            "importar dados": "Use 'Importar Excel' para carregar vários patrimônios de uma vez. O arquivo precisa das colunas: nome, localização, condição, quantidade.",
-            "importar excel": "Vá em 'Importar Excel' e selecione um arquivo .xlsx ou .csv com os dados dos patrimônios.",
-            "como importar": "Acesse 'Importar Excel', selecione o arquivo com as colunas corretas e clique em Importar.",
-            
-            "ver patrimônios": "Clique em 'Listar Patrimônios' para ver todos os itens cadastrados. Você pode filtrar e buscar na lista.",
-            "listar patrimônios": "Acesse 'Listar Patrimônios' no menu para ver a lista completa com opções de editar e deletar.",
-            
-            
-            "condições": "As condições são: Ótimo (novo ou pouco uso), Bom (uso normal), Recuperável (precisa de reparos), Péssimo (inutilizável).",
-            "quais as condições": "Temos 4 condições: Ótimo, Bom, Recuperável e Péssimo. Use estas para classificar o estado do patrimônio.",
-            
-            
-            "código do doador": "O código do doador deve ter exatamente 7 números (apenas dígitos).",
-            "código cps": "O código CPS também deve ter 7 números (somente dígitos).",
-            "quantos números no código": "Tanto código do doador quanto CPS devem ter exatamente 7 números.",
-            "código": "Os códigos (doador e CPS) devem conter 7 números. Exemplo: 1234567",
-            
-            
-            "localização": "Localização é onde o patrimônio está alocado. Exemplos: Sala 1, Laboratório de Informática, Biblioteca, Secretaria, Diretoria.",
-            "o que é localização": "É o local físico onde o patrimônio se encontra. Ajude a organizar por salas, setores ou departamentos.",
-            
-            
-            "origem": "Origem é quem doou ou forneceu o patrimônio. Exemplos: GOVERNO ESTADUAL, PREFEITURA, DOACAO PARTICULAR. Será convertido para MAIÚSCULAS automaticamente.",
-            "o que colocar em origem": "Informe a procedência do item: GOVERNO, PREFEITURA, DOADOR ESPECÍFICO, etc. O sistema converterá para maiúsculas.",
-            
-           
-            "quantidade": "Quantidade representa itens idênticos. Ex: 20 cadeiras iguais = quantidade 20. Deve ser maior que zero.",
-            
-            
-            "dashboard": "O dashboard mostra: Total de patrimônios, Distribuição por condição, Top localizações e Estatísticas de cadastro.",
-            "o que mostra o dashboard": "Estatísticas completas: total de itens, condições (Ótimo, Bom, Recuperável, Péssimo) e localizações mais comuns.",
-            
-           
-            "o que você faz": "Sou um assistente especializado no sistema de patrimônio escolar. Ajudo com cadastro, relatórios, importação e dúvidas sobre o sistema.",
-            "como usar o sistema": "1) Cadastre patrimônios 2) Liste e edite itens 3) Gere relatórios PDF 4) Importe dados do Excel 5) Acompanhe pelo dashboard",
-            "funcionalidades": "Principais funções: Cadastrar, Listar, Editar, Deletar, Relatório PDF, Importar Excel, Dashboard com estatísticas.",
-            "ajuda": "Posso ajudar com: como cadastrar patrimônio, gerar relatórios, importar dados, ver condições, entender códigos, usar o dashboard.",
-            
-            
-            "não consigo cadastrar": "Verifique: 1) Todos campos obrigatórios preenchidos 2) Quantidade maior que zero 3) Códigos com 7 números (se usados)",
-            "erro no cadastro": "Certifique-se que: nome, descrição, localização, condição e origem estão preenchidos. Quantidade deve ser número positivo.",
-            "código inválido": "Códigos devem conter exatamente 7 dígitos numéricos. Exemplo: 1234567",
-            
-           
-            "default": "🤖 Não entendi completamente. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, listagem de itens, condições, códigos (7 números) ou uso do dashboard. O que você gostaria de saber?"
-        }
-    
-    def responder(self, pergunta):
-        pergunta = pergunta.lower().strip()
-        
-       
-        if pergunta in self.respostas:
-            return self.respostas[pergunta]
-        
-
-        palavras_chave = {
-            "cadastrar": "como cadastrar",
-            "cadastro": "como cadastrar", 
-            "relatório": "gerar relatório",
-            "relatorio": "gerar relatório",
-            "importar": "importar dados",
-            "excel": "importar excel",
-            "listar": "ver patrimônios",
-            "condição": "condições",
-            "condicao": "condições",
-            "código": "código",
-            "codigo": "código",
-            "localização": "localização", 
-            "localizacao": "localização",
-            "origem": "origem",
-            "quantidade": "quantidade",
-            "dashboard": "dashboard",
-            "ajuda": "ajuda",
-            "funcionalidade": "funcionalidades"
-        }
-        
-        for palavra, resposta_key in palavras_chave.items():
-            if palavra in pergunta:
-                return self.respostas[resposta_key]
-        
-      
-        return self.respostas["default"]
-
-
-try:
-    chatbot = PatrimonioChatBot()
-    print("✅ ChatBot de Patrimônio carregado com sucesso!")
-except Exception as e:
-    print(f"❌ Erro ao carregar ChatBot: {e}")
-    chatbot = None
+import google.generativeai as genai
+from dotenv import load_dotenv
+import bcrypt
 
 app = Flask(__name__)
 CORS(app)
 app.secret_key = 'patrimonio_2024'
-
 
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -145,56 +29,36 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'root', 
+    'user': 'root',
     'password': '',
     'database': 'patrimonio'
 }
 
-# ... (suas funções de conexão e outras rotas)
+print("=" * 60)
+print("🚀 INICIANDO SISTEMA PATRIMÔNIO")
+print("=" * 60)
 
-# Rota do chat atualizada
-@app.route('/api/chat', methods=['POST'])
-def chat_with_ai():
-    try:
-        data = request.get_json()
-        user_message = data.get('message', '').strip()
 
-        if not user_message:
-            return jsonify({'error': 'Mensagem vazia'}), 400
+GEMINI_API_KEY = None
 
-        if not chatbot:
-            return jsonify({
-                'response': '🤖 Assistente temporariamente indisponível. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, listagem de itens.',
-                'type': 'fallback'
-            })
+if os.path.exists('chat.env'):
+    load_dotenv('chat.env')
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    print("✅ chat.env carregado")
+elif os.path.exists('.env'):
+    load_dotenv('.env')
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    print("✅ .env carregado")
+else:
+    print("❌ Nenhum arquivo .env encontrado!")
 
-        # Obtém resposta do chatbot
-        resposta = chatbot.responder(user_message)
-        
-        return jsonify({
-            'response': resposta,
-            'type': 'chatbot',
-            'source': 'Assistente Patrimônio'
-        })
+if GEMINI_API_KEY and len(GEMINI_API_KEY) > 20:
+    genai.configure(api_key=GEMINI_API_KEY)
+    print(f"🚀 Gemini CONFIGURADO! Chave: {GEMINI_API_KEY[:10]}...")
+else:
+    print("❌ Gemini NÃO configurado - chave inválida")
 
-    except Exception as e:
-        print(f"Erro no chat: {e}")
-        return jsonify({
-            'response': '🔧 Estou com dificuldades técnicas. Posso ajudar com: como cadastrar patrimônio, gerar relatórios PDF, importar dados do Excel ou ver a lista de patrimônios.',
-            'type': 'error_fallback'
-        })
-
-# Rota de status
-@app.route('/api/chat/status')
-def chat_status():
-    status = 'online' if chatbot else 'offline'
-    return jsonify({
-        'status': status,
-        'type': 'custom_chatbot',
-        'features': ['Offline', 'Instantâneo', 'Especializado em Patrimônio'],
-        'respostas_cadastradas': len(chatbot.respostas) if chatbot else 0
-    })
-
+print("=" * 60)
 
 def get_db_connection():
     try:
@@ -216,16 +80,110 @@ def create_upload_folder():
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
 
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def check_password(password, hashed):
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except Exception as e:
+        print(f"Erro na verificação de senha: {e}")
+        return False
+
+def criar_resposta_gemini(mensagem_usuario):
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    
+    if not GEMINI_API_KEY or len(GEMINI_API_KEY) < 20:
+        return "🔧 Assistente não configurado. Configure a chave da API Gemini no arquivo .env"
+    
+    try:
+        print(f"🔍 Tentando conectar com Gemini...")
+        genai.configure(api_key=GEMINI_API_KEY)
+        
+        # MODELO ATUALIZADO
+        model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+        
+        generation_config = {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 40,
+            "max_output_tokens": 500,
+        }
+
+        safety_settings = [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+        ]
+
+        prompt = f"""
+        Você é um assistente especializado no sistema de Gestão de Patrimônio Escolar da ETEC Ilza Nascimento Pintus.
+
+        CONTEXTO DO SISTEMA:
+        - Cadastro de patrimônios com: nome, descrição, localização, condição, origem, marca, código doador (7 números), código CPS (7 números), quantidade
+        - Condições possíveis: Ótimo, Bom, Recuperável, Péssimo
+        - Funcionalidades: Cadastrar, Listar, Editar, Deletar, Relatório PDF, Importar Excel, Dashboard
+        - Origem é sempre em MAIÚSCULAS sem acentos
+        - Códigos devem ter exatamente 7 números
+
+        Seja útil, objetivo e responda em português de forma clara e direta.
+
+        PERGUNTA DO USUÁRIO: {mensagem_usuario}
+
+        RESPOSTA:
+        """
+
+        response = model.generate_content(prompt)
+        return response.text.strip()
+
+    except Exception as e:
+        print(f"Erro no Gemini: {e}")
+        return "🤖 Estou com instabilidade no momento. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, condições (Ótimo, Bom, Recuperável, Péssimo) e códigos de 7 números."
+
+def criar_usuario_admin():
+    conn = get_db_connection()
+    if not conn:
+        return
+    
+    try:
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(50) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                ativo BOOLEAN DEFAULT TRUE,
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ultimo_login TIMESTAMP NULL
+            )
+        """)
+        
+        admin_password = hash_password('admin123')
+        
+        cursor.execute("""
+            INSERT IGNORE INTO usuarios (username, password_hash, ativo) 
+            VALUES (%s, %s, %s)
+        """, ('admin', admin_password, True))
+        
+        conn.commit()
+        print("✅ Tabela de usuários criada e admin configurado!")
+        
+    except Exception as e:
+        print(f"❌ Erro ao criar usuário admin: {e}")
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 @app.route('/')
 def index():
     if 'usuario' in session:
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
-
-import bcrypt
-
-def check_password(password, hashed):
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -250,6 +208,9 @@ def login():
             if usuario and check_password(password, usuario['password_hash']):
                 session['usuario'] = usuario['username']
                 session['user_id'] = usuario['id']
+                
+                cursor.execute("UPDATE usuarios SET ultimo_login = NOW() WHERE id = %s", (usuario['id'],))
+                conn.commit()
                 
                 flash('Login realizado com sucesso!', 'success')
                 return redirect(url_for('dashboard'))
@@ -283,11 +244,9 @@ def dashboard():
     try:
         cursor = conn.cursor(dictionary=True)
         
-        # Total de patrimônios
         cursor.execute("SELECT COUNT(*) as total FROM patrimonio")
         total_patrimonios = cursor.fetchone()['total']
         
-        # Distribuição por condição - CORRIGIDO
         cursor.execute("""
             SELECT 
                 CASE 
@@ -303,14 +262,9 @@ def dashboard():
         """)
         condicoes = cursor.fetchall()
         
-        # Debug: Verificar dados no console
-        print("Condições encontradas:", condicoes)
-        
-        # Top localizações
         cursor.execute("SELECT localizacao, COUNT(*) as count FROM patrimonio GROUP BY localizacao ORDER BY count DESC LIMIT 5")
         localizacoes = cursor.fetchall()
         
-        # Cadastros recentes (30 dias)
         cursor.execute("""
             SELECT DATE(data_cadastro) as data, COUNT(*) as count 
             FROM patrimonio 
@@ -339,8 +293,6 @@ def dashboard():
             cursor.close()
             conn.close()
 
-            
-
 @app.route('/cadastro')
 def cadastro():
     if 'usuario' not in session:
@@ -352,7 +304,6 @@ def cadastrar():
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
-    # Coletar dados do formulário
     dados = {
         'nome': request.form.get('nome', '').strip(),
         'descricao': request.form.get('descricao', '').strip(),
@@ -365,14 +316,12 @@ def cadastrar():
         'quantidade': request.form.get('quantidade', '1').strip()
     }
 
-    # Validar campos obrigatórios
     campos_obrigatorios = ['nome', 'descricao', 'localizacao', 'condicao', 'origem']
     for campo in campos_obrigatorios:
         if not dados[campo]:
             flash(f'Campo obrigatório não preenchido: {campo}', 'danger')
             return redirect(url_for('cadastro'))
 
-    # Validar quantidade
     try:
         dados['quantidade'] = int(dados['quantidade'])
         if dados['quantidade'] <= 0:
@@ -381,18 +330,22 @@ def cadastrar():
         flash('Quantidade deve ser um número válido maior que zero', 'danger')
         return redirect(url_for('cadastro'))
 
-        
+    dados['origem'] = dados['origem'].upper()
+    dados['origem'] = ''.join(
+        c for c in unicodedata.normalize('NFD', dados['origem'])
+        if unicodedata.category(c) != 'Mn'
+    )
+
     if dados['codigo_doador']:
-       if not dados['codigo_doador'].isdigit() or len(dados['codigo_doador']) != 7:
-        flash('Código do Doador deve conter exatamente 7 números', 'danger')
-        return redirect(url_for('cadastro'))
+        if not dados['codigo_doador'].isdigit() or len(dados['codigo_doador']) != 7:
+            flash('Código do Doador deve conter exatamente 7 números', 'danger')
+            return redirect(url_for('cadastro'))
 
     if dados['codigo_cps']:
-       if not dados['codigo_cps'].isdigit() or len(dados['codigo_cps']) != 7:
-        flash('Código CPS deve conter exatamente 7 números', 'danger')
-        return redirect(url_for('cadastro'))
+        if not dados['codigo_cps'].isdigit() or len(dados['codigo_cps']) != 7:
+            flash('Código CPS deve conter exatamente 7 números', 'danger')
+            return redirect(url_for('cadastro'))
 
-    # Processar imagem
     dados['imagem'] = None
     if 'imagem' in request.files:
         file = request.files['imagem']
@@ -407,18 +360,7 @@ def cadastrar():
             else:
                 flash('Tipo de arquivo não permitido. Use PNG, JPG, JPEG, GIF ou WEBP', 'danger')
                 return redirect(url_for('cadastro'))
-            
-            
-            dados['origem'] = dados['origem'].upper()
 
-
-   
-            dados['origem'] = ''.join(
-                  c for c in unicodedata.normalize('NFD', dados['origem'])
-                  if unicodedata.category(c) != 'Mn'
-)
-
-    
     conn = get_db_connection()
     if not conn:
         flash('Erro de conexão com o banco de dados', 'danger')
@@ -439,7 +381,7 @@ def cadastrar():
             dados['condicao'], dados['origem'], dados['marca'],
             dados['codigo_doador'], dados['codigo_cps'],
             dados['quantidade'], dados['imagem'],
-            session['nome_usuario']
+            session['usuario']
         ))
         
         conn.commit()
@@ -456,57 +398,77 @@ def cadastrar():
     
     return redirect(url_for('listar'))
 
-
-
 @app.route('/listar')
 def listar():
     if 'usuario' not in session:
         return redirect(url_for('login'))
-
+    
     conn = get_db_connection()
     if not conn:
-        return render_template('listar.html', patrimonios=[], filtro={})
+        flash("Erro de conexão com o banco", 'danger')
+        return render_template('listar.html', patrimonios=[])
     
     try:
         cursor = conn.cursor(dictionary=True)
         
-        filtro = request.args
-        query = "SELECT * FROM patrimonio WHERE 1=1"
-        params = []
-        
-        # Aplicar filtros
-        if filtro.get('nome'):
-            query += " AND nome LIKE %s"
-            params.append(f"%{filtro['nome']}%")
-            
-        if filtro.get('localizacao'):
-            query += " AND localizacao LIKE %s"
-            params.append(f"%{filtro['localizacao']}%")
-            
-        if filtro.get('condicao'):
-            query += " AND condicao = %s"
-            params.append(filtro['condicao'])
-        
-        if filtro.get('origem'):
-            query += " AND origem = %s"
-            params.append(filtro['origem'])
-        
-        # Ordenação
-        query += " ORDER BY data_cadastro DESC"
-        
-        cursor.execute(query, params)
+        cursor.execute("""
+            SELECT 
+                id, nome, descricao, localizacao, condicao, origem,
+                marca, codigo_doador, codigo_cps, quantidade, imagem,
+                DATE_FORMAT(data_cadastro, '%d/%m/%Y %H:%i') as data_cadastro_formatada,
+                usuario_cadastro
+            FROM patrimonio 
+            ORDER BY data_cadastro DESC
+        """)
         patrimonios = cursor.fetchall()
         
-        return render_template('listar.html', patrimonios=patrimonios, filtro=filtro)
-    
-    except Error as e:
-        flash(f'Erro ao buscar patrimônios: {str(e)}', 'danger')
-        return render_template('listar.html', patrimonios=[], filtro={})
-    
+        return render_template('listar.html', patrimonios=patrimonios)
+        
+    except Exception as e:
+        flash(f'Erro ao carregar patrimônios: {str(e)}', 'danger')
+        return render_template('listar.html', patrimonios=[])
+        
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
+@app.route('/deletar/<int:id>', methods=['POST'])
+def deletar_patrimonio(id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    if not conn:
+        flash("Erro de conexão com o banco", 'danger')
+        return redirect(url_for('listar'))
+    
+    try:
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT imagem FROM patrimonio WHERE id = %s", (id,))
+        resultado = cursor.fetchone()
+        
+        cursor.execute("DELETE FROM patrimonio WHERE id = %s", (id,))
+        conn.commit()
+        
+        if resultado and resultado[0]:
+            caminho_imagem = os.path.join(app.config['UPLOAD_FOLDER'], resultado[0])
+            if os.path.exists(caminho_imagem):
+                os.remove(caminho_imagem)
+        
+        flash('Patrimônio deletado com sucesso!', 'success')
+        
+    except Exception as e:
+        conn.rollback()
+        flash(f'Erro ao deletar patrimônio: {str(e)}', 'danger')
+        
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+    
+    return redirect(url_for('listar'))
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar_patrimonio(id):
@@ -522,7 +484,6 @@ def editar_patrimonio(id):
         cursor = conn.cursor(dictionary=True)
 
         if request.method == 'POST':
-            # Coletar dados do formulário
             dados = {
                 'nome': request.form.get('nome', '').strip(),
                 'descricao': request.form.get('descricao', '').strip(),
@@ -536,16 +497,6 @@ def editar_patrimonio(id):
                 'id': id
             }
 
-
-            dados['origem'] = dados['origem'].upper()
-
-            dados['origem'] = ''.join(
-                c for c in unicodedata.normalize('NFD', dados['origem'])
-                if unicodedata.category(c) != 'Mn'
-
-    )
-
-            # Validar campos obrigatórios
             campos_obrigatorios = ['nome', 'localizacao', 'condicao', 'origem']
             for campo in campos_obrigatorios:
                 if not dados[campo]:
@@ -560,7 +511,22 @@ def editar_patrimonio(id):
                 flash('Quantidade deve ser um número válido maior que zero', 'danger')
                 return redirect(url_for('editar_patrimonio', id=id))
 
-            # Processar nova imagem
+            dados['origem'] = dados['origem'].upper()
+            dados['origem'] = ''.join(
+                c for c in unicodedata.normalize('NFD', dados['origem'])
+                if unicodedata.category(c) != 'Mn'
+            )
+
+            if dados['codigo_doador']:
+                if not dados['codigo_doador'].isdigit() or len(dados['codigo_doador']) != 7:
+                    flash('Código do Doador deve conter exatamente 7 números', 'danger')
+                    return redirect(url_for('editar_patrimonio', id=id))
+
+            if dados['codigo_cps']:
+                if not dados['codigo_cps'].isdigit() or len(dados['codigo_cps']) != 7:
+                    flash('Código CPS deve conter exatamente 7 números', 'danger')
+                    return redirect(url_for('editar_patrimonio', id=id))
+
             nova_imagem = None
             if 'imagem' in request.files:
                 file = request.files['imagem']
@@ -575,43 +541,24 @@ def editar_patrimonio(id):
                         flash('Tipo de arquivo não permitido', 'danger')
                         return redirect(url_for('editar_patrimonio', id=id))
 
-            # Verificar se a tabela tem as colunas de atualização
-            cursor.execute("""
-                SELECT COLUMN_NAME 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = 'patrimonio' 
-                AND COLUMN_NAME IN ('data_atualizacao', 'usuario_atualizacao')
-            """)
-            colunas_existentes = [col['COLUMN_NAME'] for col in cursor.fetchall()]
-
-            # Montar query de update dinamicamente
-            campos_update = [
-                "nome = %s", "descricao = %s", "localizacao = %s",
-                "condicao = %s", "origem = %s", "marca = %s",
-                "codigo_doador = %s", "codigo_cps = %s", "quantidade = %s"
-            ]
-            
+            query = """
+            UPDATE patrimonio SET 
+                nome = %s, descricao = %s, localizacao = %s, condicao = %s, 
+                origem = %s, marca = %s, codigo_doador = %s, codigo_cps = %s, 
+                quantidade = %s, usuario_cadastro = %s
+            """
             params = [
                 dados['nome'], dados['descricao'], dados['localizacao'],
                 dados['condicao'], dados['origem'], dados['marca'],
-                dados['codigo_doador'], dados['codigo_cps'], dados['quantidade']
+                dados['codigo_doador'], dados['codigo_cps'], dados['quantidade'],
+                session['usuario']
             ]
 
-            # Adicionar imagem se fornecida
             if nova_imagem:
-                campos_update.append("imagem = %s")
+                query += ", imagem = %s"
                 params.append(nova_imagem)
 
-            # Adicionar campos de atualização se existirem
-            if 'data_atualizacao' in colunas_existentes:
-                campos_update.append("data_atualizacao = NOW()")
-            
-            if 'usuario_atualizacao' in colunas_existentes:
-                campos_update.append("usuario_atualizacao = %s")
-                params.append(session['nome_usuario'])
-
-                
-            query = f"UPDATE patrimonio SET {', '.join(campos_update)} WHERE id = %s"
+            query += " WHERE id = %s"
             params.append(id)
 
             cursor.execute(query, params)
@@ -625,7 +572,6 @@ def editar_patrimonio(id):
             return redirect(url_for('listar'))
 
         else:
-            # Carregar dados para edição (GET)
             cursor.execute("SELECT * FROM patrimonio WHERE id = %s", (id,))
             patrimonio = cursor.fetchone()
 
@@ -644,7 +590,7 @@ def editar_patrimonio(id):
     finally:
         if conn and conn.is_connected():
             cursor.close()
-            conn.close()   
+            conn.close()
 
 @app.route('/relatorio-pdf')
 def gerar_relatorio_pdf():
@@ -665,7 +611,6 @@ def gerar_relatorio_pdf():
         """)
         dados = cursor.fetchall()
 
-        # Criar PDF
         buffer = BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -679,12 +624,10 @@ def gerar_relatorio_pdf():
         elements = []
         styles = getSampleStyleSheet()
         
-        # Título
         elements.append(Paragraph("RELATÓRIO DE PATRIMÔNIOS", styles['Title']))
         elements.append(Paragraph(f"Gerado em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}", styles['Normal']))
         elements.append(Spacer(1, 20))
         
-        # Tabela de dados
         tabela_dados = [['Nome', 'Localização', 'Condição', 'Qtd', 'Marca', 'Origem']]
         
         for item in dados:
@@ -755,7 +698,6 @@ def exportar_excel():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, sheet_name='Patrimônios', index=False)
             
-            # Ajustar largura das colunas
             worksheet = writer.sheets['Patrimônios']
             for idx, col in enumerate(df.columns):
                 max_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
@@ -771,118 +713,6 @@ def exportar_excel():
         
     finally:
         if conn and conn.is_connected():
-            conn.close()
-
-@app.route('/importar-excel', methods=['GET', 'POST'])
-def importar_excel():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
-    if request.method == 'GET':
-        return render_template('importar_excel.html')
-
-    if 'file' not in request.files:
-        flash('Nenhum arquivo selecionado', 'danger')
-        return redirect(url_for('importar_excel'))
-
-    file = request.files['file']
-    if file.filename == '':
-        flash('Nenhum arquivo selecionado', 'danger')
-        return redirect(url_for('importar_excel'))
-
-    if not allowed_excel_file(file.filename):
-        flash('Tipo de arquivo não permitido. Use XLSX, XLS ou CSV', 'danger')
-        return redirect(url_for('importar_excel'))
-
-    try:
-        origem_padrao = request.form.get('defaultOrigin', 'GOVERNOS ESTADUAL').strip().upper()
-        
-        if file.filename.endswith('.csv'):
-            dfs = {'Dados': pd.read_csv(file)}
-        else:
-            xls = pd.ExcelFile(file)
-            dfs = {sheet_name: xls.parse(sheet_name) for sheet_name in xls.sheet_names}
-        
-        conn = get_db_connection()
-        if not conn:
-            flash('Erro de conexão com o banco', 'danger')
-            return redirect(url_for('importar_excel'))
-
-        cursor = conn.cursor()
-        total_sucessos = 0
-        total_erros = []
-        abas_processadas = []
-
-        for sheet_name, df in dfs.items():
-            if df.empty:
-                continue
-                
-            sucessos_aba = 0
-            erros_aba = []
-            
-            df = df.dropna(how='all')
-            df = df.reset_index(drop=True)
-            
-            for index, row in df.iterrows():
-                try:
-                    dados = extrair_dados_linha(row, sheet_name, origem_padrao)
-                    
-                    if not dados['nome'] or not dados['localizacao']:
-                        continue
-                    
-                    if dados['codigo_doador'] and (len(dados['codigo_doador']) != 7 or not dados['codigo_doador'].isdigit()):
-                        dados['codigo_doador'] = ''
-                    
-                    if dados['codigo_cps'] and (len(dados['codigo_cps']) != 7 or not dados['codigo_cps'].isdigit()):
-                        dados['codigo_cps'] = ''
-                    
-                    condicao_normalizada = normalizar_condicao(dados['condicao'])
-                    
-                    query = """
-                    INSERT INTO patrimonio (
-                        nome, descricao, localizacao, condicao, origem, marca,
-                        codigo_doador, codigo_cps, quantidade, data_cadastro, usuario_cadastro
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s)
-                    """
-                    
-                    cursor.execute(query, (
-                        dados['nome'], dados['descricao'], dados['localizacao'],
-                        condicao_normalizada, dados['origem'], dados['marca'],
-                        dados['codigo_doador'], dados['codigo_cps'],
-                        dados['quantidade'], session['nome_usuario']
-                    ))
-                    
-                    sucessos_aba += 1
-                    
-                except Exception as e:
-                    erros_aba.append(f"Aba {sheet_name}, Linha {index + 2}: {str(e)}")
-            
-            if sucessos_aba > 0:
-                abas_processadas.append(f"{sheet_name} ({sucessos_aba} itens)")
-                total_sucessos += sucessos_aba
-            
-            total_erros.extend(erros_aba)
-        
-        conn.commit()
-        
-        if total_sucessos > 0:
-            mensagem = f'Importação concluída! {total_sucessos} patrimônios importados de {len(abas_processadas)} abas.'
-            if abas_processadas:
-                mensagem += f' Abas: {", ".join(abas_processadas)}'
-            flash(mensagem, 'success')
-        
-        if total_erros:
-            flash(f'Erros encontrados: {len(total_erros)} linhas não importadas.', 'warning')
-        
-        return redirect(url_for('listar'))
-
-    except Exception as e:
-        flash(f'Erro ao processar arquivo: {str(e)}', 'danger')
-        return redirect(url_for('importar_excel'))
-        
-    finally:
-        if 'conn' in locals() and conn.is_connected():
-            cursor.close()
             conn.close()
 
 def extrair_dados_linha(row, sheet_name, origem_padrao):
@@ -954,6 +784,118 @@ def normalizar_condicao(condicao):
     else:
         return 'Bom'
 
+@app.route('/importar-excel', methods=['GET', 'POST'])
+def importar_excel():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('importar_excel.html')
+
+    if 'file' not in request.files:
+        flash('Nenhum arquivo selecionado', 'danger')
+        return redirect(url_for('importar_excel'))
+
+    file = request.files['file']
+    if file.filename == '':
+        flash('Nenhum arquivo selecionado', 'danger')
+        return redirect(url_for('importar_excel'))
+
+    if not allowed_excel_file(file.filename):
+        flash('Tipo de arquivo não permitido. Use XLSX, XLS ou CSV', 'danger')
+        return redirect(url_for('importar_excel'))
+
+    try:
+        origem_padrao = request.form.get('defaultOrigin', 'GOVERNO ESTADUAL').strip().upper()
+        
+        if file.filename.endswith('.csv'):
+            dfs = {'Dados': pd.read_csv(file)}
+        else:
+            xls = pd.ExcelFile(file)
+            dfs = {sheet_name: xls.parse(sheet_name) for sheet_name in xls.sheet_names}
+        
+        conn = get_db_connection()
+        if not conn:
+            flash('Erro de conexão com o banco', 'danger')
+            return redirect(url_for('importar_excel'))
+
+        cursor = conn.cursor()
+        total_sucessos = 0
+        total_erros = []
+        abas_processadas = []
+
+        for sheet_name, df in dfs.items():
+            if df.empty:
+                continue
+                
+            sucessos_aba = 0
+            erros_aba = []
+            
+            df = df.dropna(how='all')
+            df = df.reset_index(drop=True)
+            
+            for index, row in df.iterrows():
+                try:
+                    dados = extrair_dados_linha(row, sheet_name, origem_padrao)
+                    
+                    if not dados['nome'] or not dados['localizacao']:
+                        continue
+                    
+                    if dados['codigo_doador'] and (len(dados['codigo_doador']) != 7 or not dados['codigo_doador'].isdigit()):
+                        dados['codigo_doador'] = ''
+                    
+                    if dados['codigo_cps'] and (len(dados['codigo_cps']) != 7 or not dados['codigo_cps'].isdigit()):
+                        dados['codigo_cps'] = ''
+                    
+                    condicao_normalizada = normalizar_condicao(dados['condicao'])
+                    
+                    query = """
+                    INSERT INTO patrimonio (
+                        nome, descricao, localizacao, condicao, origem, marca,
+                        codigo_doador, codigo_cps, quantidade, data_cadastro, usuario_cadastro
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s)
+                    """
+                    
+                    cursor.execute(query, (
+                        dados['nome'], dados['descricao'], dados['localizacao'],
+                        condicao_normalizada, dados['origem'], dados['marca'],
+                        dados['codigo_doador'], dados['codigo_cps'],
+                        dados['quantidade'], session['usuario']
+                    ))
+                    
+                    sucessos_aba += 1
+                    
+                except Exception as e:
+                    erros_aba.append(f"Aba {sheet_name}, Linha {index + 2}: {str(e)}")
+            
+            if sucessos_aba > 0:
+                abas_processadas.append(f"{sheet_name} ({sucessos_aba} itens)")
+                total_sucessos += sucessos_aba
+            
+            total_erros.extend(erros_aba)
+        
+        conn.commit()
+        
+        if total_sucessos > 0:
+            mensagem = f'Importação concluída! {total_sucessos} patrimônios importados de {len(abas_processadas)} abas.'
+            if abas_processadas:
+                mensagem += f' Abas: {", ".join(abas_processadas)}'
+            flash(mensagem, 'success')
+        
+        if total_erros:
+            flash(f'Erros encontrados: {len(total_erros)} linhas não importadas.', 'warning')
+        
+        return redirect(url_for('listar'))
+
+    except Exception as e:
+        flash(f'Erro ao processar arquivo: {str(e)}', 'danger')
+        return redirect(url_for('importar_excel'))
+        
+    finally:
+        if 'conn' in locals() and conn.is_connected():
+            cursor.close()
+            conn.close()
+
 @app.route('/imagens/<filename>')
 def servir_imagem(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -992,13 +934,8 @@ def api_stats():
 def health_check():
     return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
 
-# =============================================
-# APIs PARA MOBILE
-# =============================================
-
 @app.route('/api/patrimonio/<codigo>')
 def api_buscar_patrimonio(codigo):
-    """API para buscar patrimônio por código CPS ou doador"""
     conn = get_db_connection()
     if not conn:
         return jsonify({'error': 'Erro de conexão com o banco'}), 500
@@ -1006,7 +943,6 @@ def api_buscar_patrimonio(codigo):
     try:
         cursor = conn.cursor(dictionary=True)
         
-        # Buscar por código CPS ou código doador
         cursor.execute("""
             SELECT 
                 id, nome, descricao, localizacao, condicao, origem, 
@@ -1048,7 +984,6 @@ def api_buscar_patrimonio(codigo):
 
 @app.route('/api/patrimonio/scan', methods=['POST'])
 def api_scan_patrimonio():
-    """API para scanear múltiplos códigos de uma vez"""
     try:
         data = request.get_json()
         if not data or 'codigos' not in data:
@@ -1094,7 +1029,6 @@ def api_scan_patrimonio():
 
 @app.route('/api/status')
 def api_status():
-    """API para verificar status do servidor"""
     try:
         conn = get_db_connection()
         if conn:
@@ -1112,16 +1046,58 @@ def api_status():
 @app.route('/mobile')
 @app.route('/app')
 def mobile_app():
-    """Página mobile para consulta"""
     return render_template('mobile.html')
 
 @app.route('/qrcode')
 def qrcode_scanner():
-    """Página com scanner de QR Code"""
     return render_template('qrcode.html')
+
+@app.route('/api/chat', methods=['POST'])
+def chat_with_ai():
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+
+        if not user_message:
+            return jsonify({'error': 'Mensagem vazia'}), 400
+
+        resposta = criar_resposta_gemini(user_message)
+        
+        return jsonify({
+            'response': resposta,
+            'type': 'gemini',
+            'source': 'Google Gemini Pro'
+        })
+
+    except Exception as e:
+        print(f"Erro no chat: {e}")
+        return jsonify({
+            'response': '🔧 Estou com dificuldades técnicas. Posso ajudar com: como cadastrar patrimônio, gerar relatórios PDF, importar dados do Excel ou ver a lista de patrimônios.',
+            'type': 'error_fallback'
+        })
+
+@app.route('/api/chat/status')
+def chat_status():
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key and len(api_key) > 20:
+        return jsonify({
+            'status': 'online',
+            'type': 'google_gemini',
+            'model': 'Gemini 1.5 Pro',  # ATUALIZADO
+            'features': ['IA Gratuita', 'Contexto Patrimonial', 'Respostas Naturais']
+        })
+    else:
+        return jsonify({
+            'status': 'offline',
+            'type': 'google_gemini',
+            'model': 'Gemini 1.5 Pro', 
+            'features': ['IA Gratuita', 'Contexto Patrimonial', 'Respostas Naturais']
+        })
+
 
 if __name__ == '__main__':
     create_upload_folder()
+    criar_usuario_admin()
     
     test_conn = get_db_connection()
     if test_conn:
