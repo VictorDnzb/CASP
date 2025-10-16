@@ -157,8 +157,7 @@ def criar_usuario_admin():
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
                 ativo BOOLEAN DEFAULT TRUE,
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ultimo_login TIMESTAMP NULL
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         
@@ -208,10 +207,7 @@ def login():
             if usuario and check_password(password, usuario['password_hash']):
                 session['usuario'] = usuario['username']
                 session['user_id'] = usuario['id']
-                
-                cursor.execute("UPDATE usuarios SET ultimo_login = NOW() WHERE id = %s", (usuario['id'],))
-                conn.commit()
-                
+                         
                 flash('Login realizado com sucesso!', 'success')
                 return redirect(url_for('dashboard'))
             else:
