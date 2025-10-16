@@ -3,11 +3,11 @@
 {% block title %}Editar Patrimônio - Sistema de Patrimônio Escolar{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-warning text-dark">
                     <h4 class="mb-0">
                         <i class="fas fa-edit me-2"></i>
                         Editar Patrimônio
@@ -15,200 +15,178 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        <div class="row">
+                        
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Informações Básicas
+                                </h5>
+                            </div>
+                            
                             <div class="col-md-6 mb-3">
-                                <label for="nome" class="form-label">
-                                    <i class="fas fa-tag me-1"></i>
-                                    Nome do Patrimônio *
-                                </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="nome" 
-                                       name="nome" 
-                                       value="{{ patrimonio.nome }}"
-                                       required
-                                       maxlength="100">
+                                <label for="nome" class="form-label">Nome do Patrimônio *</label>
+                                <input type="text" class="form-control" id="nome" name="nome" 
+                                       value="{{ patrimonio.nome }}" required>
                                 <div class="invalid-feedback">
                                     Por favor, informe o nome do patrimônio.
                                 </div>
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="quantidade" class="form-label">
-                                    <i class="fas fa-hashtag me-1"></i>
-                                    Quantidade *
-                                </label>
-                                <input type="number" 
-                                       class="form-control" 
-                                       id="quantidade" 
-                                       name="quantidade" 
-                                       value="{{ patrimonio.quantidade }}"
-                                       min="1"
-                                       required>
+                                <label for="origem" class="form-label">Origem/Quem Doou *</label>
+                                <input type="text" class="form-control" id="origem" name="origem" 
+                                       value="{{ patrimonio.origem }}" required
+                                       oninput="formatarMaiusculasSemAcentos(this)">
                                 <div class="invalid-feedback">
-                                    A quantidade deve ser maior que zero.
+                                    Por favor, informe a origem/doação.
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="descricao" class="form-label">Descrição *</label>
+                                <textarea class="form-control" id="descricao" name="descricao" rows="3" required>{{ patrimonio.descricao }}</textarea>
+                                <div class="invalid-feedback">
+                                    Por favor, informe uma descrição.
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label">
-                                <i class="fas fa-align-left me-1"></i>
-                                Descrição *
-                            </label>
-                            <textarea class="form-control" 
-                                      id="descricao" 
-                                      name="descricao" 
-                                      rows="3"
-                                      required>{{ patrimonio.descricao }}</textarea>
-                            <div class="invalid-feedback">
-                                Por favor, informe a descrição do patrimônio.
+
+                   
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    Localização e Estado
+                                </h5>
                             </div>
-                        </div>
-                        
-                        <div class="row">
+                            
                             <div class="col-md-6 mb-3">
-                                <label for="localizacao" class="form-label">
-                                    <i class="fas fa-map-marker-alt me-1"></i>
-                                    Localização *
-                                </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="localizacao" 
-                                       name="localizacao" 
-                                       value="{{ patrimonio.localizacao }}"
-                                       required
-                                       maxlength="100">
+                                <label for="localizacao" class="form-label">Localização *</label>
+                                <input type="text" class="form-control" id="localizacao" name="localizacao" 
+                                       value="{{ patrimonio.localizacao }}" required>
                                 <div class="invalid-feedback">
                                     Por favor, informe a localização.
                                 </div>
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="condicao" class="form-label">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    Condição *
-                                </label>
+                                <label for="condicao" class="form-label">Condição *</label>
                                 <select class="form-select" id="condicao" name="condicao" required>
-                                    <option value="">Selecione a condição</option>
-                                    <option value="Òtimo" {% if patrimonio.condicao == 'Òtimo' %}selected{% endif %}>Òtimo</option>
-                                    <option value="Bom" {% if patrimonio.condicao == 'Bom' %}selected{% endif %}>Bom</option>
-                                    <option value="Recuperável" {% if patrimonio.condicao == 'Recuperável' %}selected{% endif %}>Recuperável</option>
-                                    <option value="Péssimo" {% if patrimonio.condicao == 'Péssimo' %}selected{% endif %}>Péssimo</option>
+                                    <option value="">Selecione a condição...</option>
+                                    <option value="Ótimo" {% if patrimonio.condicao in ['Ótimo', 'otimo', 'ótimo'] %}selected{% endif %}>Ótimo</option>
+                                    <option value="Bom" {% if patrimonio.condicao in ['Bom', 'bom'] %}selected{% endif %}>Bom</option>
+                                    <option value="Recuperável" {% if patrimonio.condicao in ['Recuperável', 'recuperavel', 'recuperável'] %}selected{% endif %}>Recuperável</option>
+                                    <option value="Péssimo" {% if patrimonio.condicao in ['Péssimo', 'pessimo', 'péssimo'] %}selected{% endif %}>Péssimo</option>
                                 </select>
                                 <div class="invalid-feedback">
                                     Por favor, selecione a condição.
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="origem" class="form-label">
-                                    <i class="fas fa-source me-1"></i>
-                                    Origem *
-                                </label>
-                                <select class="form-select" id="origem" name="origem" required>
-                                    <option value="">Selecione a origem</option>
-                                    <option value="CPS" {% if patrimonio.origem == 'CPS' %}selected{% endif %}>CPS</option>
-                                    <option value="Doação" {% if patrimonio.origem == 'Doação' %}selected{% endif %}>Doação</option>
-                                </select>
+
+                       
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-barcode me-2"></i>
+                                    Informações Adicionais
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="marca" class="form-label">Marca</label>
+                                <input type="text" class="form-control" id="marca" name="marca" 
+                                       value="{{ patrimonio.marca or '' }}">
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="codigo_doador" class="form-label">Código do Doador</label>
+                                <input type="text" class="form-control" id="codigo_doador" name="codigo_doador" 
+                                       value="{{ patrimonio.codigo_doador or '' }}"
+                                       placeholder="Apenas 7 números"
+                                       pattern="[0-9]{7}"
+                                       maxlength="7"
+                                       oninput="validarApenasNumeros(this)">
                                 <div class="invalid-feedback">
-                                    Por favor, selecione a origem.
+                                    O código deve conter exatamente 7 números.
                                 </div>
                             </div>
                             
-                            <div class="col-md-6 mb-3">
-                                <label for="marca" class="form-label">
-                                    <i class="fas fa-industry me-1"></i>
-                                    Marca
-                                </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="marca" 
-                                       name="marca" 
-                                       value="{{ patrimonio.marca or '' }}"
-                                       maxlength="100">
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="codigo_doador" class="form-label">
-                                    <i class="fas fa-barcode me-1"></i>
-                                    Código do Doador
-                                </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="codigo_doador" 
-                                       name="codigo_doador" 
-                                       value="{{ patrimonio.codigo_doador or '' }}"
-                                       maxlength="100">
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="codigo_cps" class="form-label">
-                                    <i class="fas fa-qrcode me-1"></i>
-                                    Código CPS
-                                </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="codigo_cps" 
-                                       name="codigo_cps" 
+                            <div class="col-md-4 mb-3">
+                                <label for="codigo_cps" class="form-label">Código CPS</label>
+                                <input type="text" class="form-control" id="codigo_cps" name="codigo_cps" 
                                        value="{{ patrimonio.codigo_cps or '' }}"
-                                       maxlength="100">
+                                       placeholder="Apenas 7 números"
+                                       pattern="[0-9]{7}"
+                                       maxlength="7"
+                                       oninput="validarApenasNumeros(this)">
+                                <div class="invalid-feedback">
+                                    O código deve conter exatamente 7 números.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="quantidade" class="form-label">Quantidade *</label>
+                                <input type="number" class="form-control" id="quantidade" name="quantidade" 
+                                       value="{{ patrimonio.quantidade }}" min="1" required>
+                                <div class="invalid-feedback">
+                                    A quantidade deve ser maior que zero.
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="mb-4">
-                            <label for="imagem" class="form-label">
-                                <i class="fas fa-camera me-1"></i>
-                                Imagem do Patrimônio
-                            </label>
-                            
-                            {% if patrimonio.imagem %}
-                            <div class="mb-3">
-                                <p class="text-muted mb-2">Imagem atual:</p>
-                                <img src="{{ url_for('servir_imagem', filename=patrimonio.imagem) }}" 
-                                     alt="Imagem atual" 
-                                     class="image-preview"
-                                     style="max-width: 200px; max-height: 200px;">
+
+                        <!-- Imagem -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-image me-2"></i>
+                                    Imagem do Patrimônio
+                                </h5>
                             </div>
-                            {% endif %}
                             
-                            <input type="file" 
-                                   class="form-control" 
-                                   id="imagem" 
-                                   name="imagem" 
-                                   accept="image/*">
-                            <div class="form-text">
-                                Formatos aceitos: PNG, JPG, JPEG, GIF, WEBP (máx. 16MB)
+                            <div class="col-md-6 mb-3">
+                                <label for="imagem" class="form-label">Nova Foto (Opcional)</label>
+                                <input type="file" class="form-control" id="imagem" name="imagem" 
+                                       accept=".png,.jpg,.jpeg,.gif,.webp">
+                                <small class="form-text text-muted">
+                                    Deixe em branco para manter a imagem atual
+                                </small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
                                 {% if patrimonio.imagem %}
-                                <br>Deixe em branco para manter a imagem atual
+                                <label class="form-label">Imagem Atual</label>
+                                <div>
+                                    <img src="{{ url_for('servir_imagem', filename=patrimonio.imagem) }}" 
+                                         alt="{{ patrimonio.nome }}" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 200px;">
+                                    <br>
+                                    <small class="text-muted">Imagem atual do patrimônio</small>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Nenhuma imagem cadastrada
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
-                        
-                        {% if patrimonio.data_cadastro %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Informações do cadastro:</strong><br>
-                            Cadastrado em: {{ patrimonio.data_cadastro.strftime('%d/%m/%Y às %H:%M') }}<br>
-                            {% if patrimonio.usuario_cadastro %}
-                            Por: {{ patrimonio.usuario_cadastro }}
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('listar') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>
-                                Voltar
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>
-                                Salvar Alterações
-                            </button>
+
+                        <!-- Botões -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('listar') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-save me-2"></i>Atualizar Patrimônio
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -220,55 +198,85 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const submitBtn = form.querySelector('button[type="submit"]');
+
+function formatarMaiusculasSemAcentos(input) {
+   
+    let texto = input.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    texto = texto.toUpperCase();
+  
+    input.value = texto;
+}
+
+
+function validarApenasNumeros(input) {
+  
+    input.value = input.value.replace(/[^0-9]/g, '');
     
-    form.addEventListener('submit', function(e) {
-        if (form.checkValidity()) {
-            submitBtn.innerHTML = '<span class="loading"></span> Salvando...';
-            submitBtn.disabled = true;
-        }
-    });
-    
-    const condicaoSelect = document.getElementById('condicao');
-    condicaoSelect.addEventListener('change', function() {
-        const badge = document.getElementById('condicao-badge');
-        if (badge) badge.remove();
-        
-        if (this.value) {
-            const newBadge = document.createElement('span');
-            newBadge.id = 'condicao-badge';
-            newBadge.className = `badge ms-2 ${getCondicaoClass(this.value)}`;
-            newBadge.textContent = this.value;
-            this.parentNode.appendChild(newBadge);
-        }
-    });
-    
-function getCondicaoClass(condicao) {
-    switch(condicao) {
-        case 'Ótimo': return 'bg-success';
-        case 'Bom': return 'bg-primary';
-        case 'Recuperável': return 'bg-warning';
-        case 'Péssimo': return 'bg-danger';
-        default: return 'bg-secondary';
+  
+    if (input.value.length > 7) {
+        input.value = input.value.slice(0, 7);
     }
 }
-    
-    const inputs = form.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            if (this.checkValidity()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            } else {
-                this.classList.remove('is-valid');
-                this.classList.add('is-invalid');
-            }
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const origemInput = document.getElementById('origem');
+    if (origemInput) {
+       
+        formatarMaiusculasSemAcentos(origemInput);
+        
+       
+        origemInput.addEventListener('input', function() {
+            formatarMaiusculasSemAcentos(this);
         });
-    });
+    }
     
-    condicaoSelect.dispatchEvent(new Event('change'));
+    
+    const codigoDoador = document.getElementById('codigo_doador');
+    const codigoCps = document.getElementById('codigo_cps');
+    
+    if (codigoDoador) {
+        codigoDoador.addEventListener('input', function() {
+            validarApenasNumeros(this);
+        });
+       
+        validarApenasNumeros(codigoDoador);
+    }
+    
+    if (codigoCps) {
+        codigoCps.addEventListener('input', function() {
+            validarApenasNumeros(this);
+        });
+        
+        validarApenasNumeros(codigoCps);
+    }
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        const origemInput = document.getElementById('origem');
+        if (origemInput && !origemInput.value.trim()) {
+            event.preventDefault();
+            event.stopPropagation();
+            origemInput.classList.add('is-invalid');
+        }
+        
+       
+        const codigoDoador = document.getElementById('codigo_doador');
+        const codigoCps = document.getElementById('codigo_cps');
+        
+        if (codigoDoador && codigoDoador.value && codigoDoador.value.length !== 7) {
+            event.preventDefault();
+            event.stopPropagation();
+            codigoDoador.classList.add('is-invalid');
+        }
+        
+        if (codigoCps && codigoCps.value && codigoCps.value.length !== 7) {
+            event.preventDefault();
+            event.stopPropagation();
+            codigoCps.classList.add('is-invalid');
+        }
+    });
 });
 </script>
 {% endblock %}
