@@ -12,11 +12,131 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+import unicodedata
+import requests
+import json
+import time
 
+# Configuração simplificada do ChatBot
+class PatrimonioChatBot:
+    def __init__(self):
+        self.respostas = self.carregar_respostas()
+        print("✅ ChatBot de Patrimônio inicializado!")
+    
+    def carregar_respostas(self):
+        return {
+            
+            "oi": "Olá! Sou seu assistente de patrimônio escolar. Como posso ajudar?",
+            "olá": "Olá! Em que posso ser útil hoje?",
+            "ola": "Olá! Sou o assistente do sistema de patrimônio.",
+            "bom dia": "Bom dia! Como posso ajudá-lo com o sistema de patrimônio?",
+            "boa tarde": "Boa tarde! Estou aqui para ajudar com o cadastro e gestão de patrimônios.",
+            "boa noite": "Boa noite! Em que posso ser útil?",
+            
+            
+            "como cadastrar": "Para cadastrar um patrimônio: 1) Acesse 'Cadastrar Patrimônio' 2) Preencha nome, descrição, localização, condição e origem 3) Códigos doador/CPS devem ter 7 números 4) Clique em Salvar",
+            "cadastrar patrimônio": "Vá em 'Cadastrar Patrimônio' no menu. Campos obrigatórios: nome, descrição, localização, condição, origem.",
+            "como fazer cadastro": "Use o menu 'Cadastrar Patrimônio'. Preencha todos os campos marcados com * e clique em Salvar.",
+            
+            "gerar relatório": "Clique em 'Relatório PDF' no dashboard para gerar um relatório completo com todos os patrimônios.",
+            "relatório pdf": "Acesse o dashboard e clique no botão 'Relatório PDF' para baixar o documento em PDF.",
+            "como gerar relatório": "No dashboard, clique em 'Relatório PDF'. O sistema criará um documento organizado com todos os patrimônios.",
+            
+            "importar dados": "Use 'Importar Excel' para carregar vários patrimônios de uma vez. O arquivo precisa das colunas: nome, localização, condição, quantidade.",
+            "importar excel": "Vá em 'Importar Excel' e selecione um arquivo .xlsx ou .csv com os dados dos patrimônios.",
+            "como importar": "Acesse 'Importar Excel', selecione o arquivo com as colunas corretas e clique em Importar.",
+            
+            "ver patrimônios": "Clique em 'Listar Patrimônios' para ver todos os itens cadastrados. Você pode filtrar e buscar na lista.",
+            "listar patrimônios": "Acesse 'Listar Patrimônios' no menu para ver a lista completa com opções de editar e deletar.",
+            
+            
+            "condições": "As condições são: Ótimo (novo ou pouco uso), Bom (uso normal), Recuperável (precisa de reparos), Péssimo (inutilizável).",
+            "quais as condições": "Temos 4 condições: Ótimo, Bom, Recuperável e Péssimo. Use estas para classificar o estado do patrimônio.",
+            
+            
+            "código do doador": "O código do doador deve ter exatamente 7 números (apenas dígitos).",
+            "código cps": "O código CPS também deve ter 7 números (somente dígitos).",
+            "quantos números no código": "Tanto código do doador quanto CPS devem ter exatamente 7 números.",
+            "código": "Os códigos (doador e CPS) devem conter 7 números. Exemplo: 1234567",
+            
+            
+            "localização": "Localização é onde o patrimônio está alocado. Exemplos: Sala 1, Laboratório de Informática, Biblioteca, Secretaria, Diretoria.",
+            "o que é localização": "É o local físico onde o patrimônio se encontra. Ajude a organizar por salas, setores ou departamentos.",
+            
+            
+            "origem": "Origem é quem doou ou forneceu o patrimônio. Exemplos: GOVERNO ESTADUAL, PREFEITURA, DOACAO PARTICULAR. Será convertido para MAIÚSCULAS automaticamente.",
+            "o que colocar em origem": "Informe a procedência do item: GOVERNO, PREFEITURA, DOADOR ESPECÍFICO, etc. O sistema converterá para maiúsculas.",
+            
+           
+            "quantidade": "Quantidade representa itens idênticos. Ex: 20 cadeiras iguais = quantidade 20. Deve ser maior que zero.",
+            
+            
+            "dashboard": "O dashboard mostra: Total de patrimônios, Distribuição por condição, Top localizações e Estatísticas de cadastro.",
+            "o que mostra o dashboard": "Estatísticas completas: total de itens, condições (Ótimo, Bom, Recuperável, Péssimo) e localizações mais comuns.",
+            
+           
+            "o que você faz": "Sou um assistente especializado no sistema de patrimônio escolar. Ajudo com cadastro, relatórios, importação e dúvidas sobre o sistema.",
+            "como usar o sistema": "1) Cadastre patrimônios 2) Liste e edite itens 3) Gere relatórios PDF 4) Importe dados do Excel 5) Acompanhe pelo dashboard",
+            "funcionalidades": "Principais funções: Cadastrar, Listar, Editar, Deletar, Relatório PDF, Importar Excel, Dashboard com estatísticas.",
+            "ajuda": "Posso ajudar com: como cadastrar patrimônio, gerar relatórios, importar dados, ver condições, entender códigos, usar o dashboard.",
+            
+            
+            "não consigo cadastrar": "Verifique: 1) Todos campos obrigatórios preenchidos 2) Quantidade maior que zero 3) Códigos com 7 números (se usados)",
+            "erro no cadastro": "Certifique-se que: nome, descrição, localização, condição e origem estão preenchidos. Quantidade deve ser número positivo.",
+            "código inválido": "Códigos devem conter exatamente 7 dígitos numéricos. Exemplo: 1234567",
+            
+           
+            "default": "🤖 Não entendi completamente. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, listagem de itens, condições, códigos (7 números) ou uso do dashboard. O que você gostaria de saber?"
+        }
+    
+    def responder(self, pergunta):
+        pergunta = pergunta.lower().strip()
+        
+       
+        if pergunta in self.respostas:
+            return self.respostas[pergunta]
+        
+
+        palavras_chave = {
+            "cadastrar": "como cadastrar",
+            "cadastro": "como cadastrar", 
+            "relatório": "gerar relatório",
+            "relatorio": "gerar relatório",
+            "importar": "importar dados",
+            "excel": "importar excel",
+            "listar": "ver patrimônios",
+            "condição": "condições",
+            "condicao": "condições",
+            "código": "código",
+            "codigo": "código",
+            "localização": "localização", 
+            "localizacao": "localização",
+            "origem": "origem",
+            "quantidade": "quantidade",
+            "dashboard": "dashboard",
+            "ajuda": "ajuda",
+            "funcionalidade": "funcionalidades"
+        }
+        
+        for palavra, resposta_key in palavras_chave.items():
+            if palavra in pergunta:
+                return self.respostas[resposta_key]
+        
+      
+        return self.respostas["default"]
+
+
+try:
+    chatbot = PatrimonioChatBot()
+    print("✅ ChatBot de Patrimônio carregado com sucesso!")
+except Exception as e:
+    print(f"❌ Erro ao carregar ChatBot: {e}")
+    chatbot = None
 
 app = Flask(__name__)
 CORS(app)
 app.secret_key = 'patrimonio_2024'
+
 
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -25,10 +145,56 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'root',
+    'user': 'root', 
     'password': '',
     'database': 'patrimonio'
 }
+
+# ... (suas funções de conexão e outras rotas)
+
+# Rota do chat atualizada
+@app.route('/api/chat', methods=['POST'])
+def chat_with_ai():
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+
+        if not user_message:
+            return jsonify({'error': 'Mensagem vazia'}), 400
+
+        if not chatbot:
+            return jsonify({
+                'response': '🤖 Assistente temporariamente indisponível. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, listagem de itens.',
+                'type': 'fallback'
+            })
+
+        # Obtém resposta do chatbot
+        resposta = chatbot.responder(user_message)
+        
+        return jsonify({
+            'response': resposta,
+            'type': 'chatbot',
+            'source': 'Assistente Patrimônio'
+        })
+
+    except Exception as e:
+        print(f"Erro no chat: {e}")
+        return jsonify({
+            'response': '🔧 Estou com dificuldades técnicas. Posso ajudar com: como cadastrar patrimônio, gerar relatórios PDF, importar dados do Excel ou ver a lista de patrimônios.',
+            'type': 'error_fallback'
+        })
+
+# Rota de status
+@app.route('/api/chat/status')
+def chat_status():
+    status = 'online' if chatbot else 'offline'
+    return jsonify({
+        'status': status,
+        'type': 'custom_chatbot',
+        'features': ['Offline', 'Instantâneo', 'Especializado em Patrimônio'],
+        'respostas_cadastradas': len(chatbot.respostas) if chatbot else 0
+    })
+
 
 def get_db_connection():
     try:
@@ -56,19 +222,46 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
+import bcrypt
+
+def check_password(password, hashed):
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         
-        if username == 'admin' and password == 'admin123':
-            session['usuario'] = username
-            session['nome_usuario'] = 'Administrador'
-            flash('Login realizado com sucesso!', 'success')
-            return redirect(url_for('dashboard'))
+        if not username or not password:
+            flash('Preencha todos os campos', 'danger')
+            return render_template('login.html')
         
-        flash('Credenciais inválidas', 'danger')
+        conn = get_db_connection()
+        if not conn:
+            flash('Erro de conexão com o banco', 'danger')
+            return render_template('login.html')
+        
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM usuarios WHERE username = %s AND ativo = TRUE", (username,))
+            usuario = cursor.fetchone()
+            
+            if usuario and check_password(password, usuario['password_hash']):
+                session['usuario'] = usuario['username']
+                session['user_id'] = usuario['id']
+                
+                flash('Login realizado com sucesso!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Credenciais inválidas', 'danger')
+        
+        except Exception as e:
+            flash(f'Erro no login: {str(e)}', 'danger')
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
     
     return render_template('login.html')
 
@@ -188,6 +381,17 @@ def cadastrar():
         flash('Quantidade deve ser um número válido maior que zero', 'danger')
         return redirect(url_for('cadastro'))
 
+        
+    if dados['codigo_doador']:
+       if not dados['codigo_doador'].isdigit() or len(dados['codigo_doador']) != 7:
+        flash('Código do Doador deve conter exatamente 7 números', 'danger')
+        return redirect(url_for('cadastro'))
+
+    if dados['codigo_cps']:
+       if not dados['codigo_cps'].isdigit() or len(dados['codigo_cps']) != 7:
+        flash('Código CPS deve conter exatamente 7 números', 'danger')
+        return redirect(url_for('cadastro'))
+
     # Processar imagem
     dados['imagem'] = None
     if 'imagem' in request.files:
@@ -203,8 +407,18 @@ def cadastrar():
             else:
                 flash('Tipo de arquivo não permitido. Use PNG, JPG, JPEG, GIF ou WEBP', 'danger')
                 return redirect(url_for('cadastro'))
+            
+            
+            dados['origem'] = dados['origem'].upper()
 
-    # Inserir no banco
+
+   
+            dados['origem'] = ''.join(
+                  c for c in unicodedata.normalize('NFD', dados['origem'])
+                  if unicodedata.category(c) != 'Mn'
+)
+
+    
     conn = get_db_connection()
     if not conn:
         flash('Erro de conexão com o banco de dados', 'danger')
@@ -243,63 +457,6 @@ def cadastrar():
     return redirect(url_for('listar'))
 
 
-from flask import request, jsonify
-import requests
-import json
-
-@app.route('/api/chat', methods=['POST'])
-def chat_with_ai():
-    try:
-        data = request.get_json()
-        user_message = data.get('message', '')
-        
-        if not user_message:
-            return jsonify({'error': 'Mensagem vazia'}), 400
-        
-        ollama_url = "http://localhost:11434/api/chat"
-        
-        payload = {
-            "model": "llama2",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Você é um assistente especializado em gestão de patrimônio escolar. Ajude com questões sobre inventário, manutenção, cadastro e gestão de patrimônios. Seja útil, direto e objetivo em suas respostas. Responda em português."
-                },
-                {
-                    "role": "user",
-                    "content": user_message
-                }
-            ],
-            "stream": False
-        }
-        
-        response = requests.post(ollama_url, json=payload, timeout=30)
-        response.raise_for_status()
-        
-        ai_response = response.json()
-        return jsonify({
-            'response': ai_response['message']['content']
-        })
-        
-    except requests.exceptions.ConnectionError:
-        return jsonify({'error': 'Serviço Ollama não está disponível'}), 503
-    except requests.exceptions.Timeout:
-        return jsonify({'error': 'Tempo limite excedido'}), 408
-    except Exception as e:
-        return jsonify({'error': f'Erro: {str(e)}'}), 500
-
-@app.route('/api/chat/status')
-def chat_status():
-    try:
-        response = requests.get("http://localhost:11434/api/tags", timeout=5)
-        models = response.json().get('models', [])
-        return jsonify({
-            'status': 'online',
-            'models': models
-        })
-    except Exception:
-        return jsonify({'status': 'offline'}), 503
-
 
 @app.route('/listar')
 def listar():
@@ -329,7 +486,7 @@ def listar():
         if filtro.get('condicao'):
             query += " AND condicao = %s"
             params.append(filtro['condicao'])
-            
+        
         if filtro.get('origem'):
             query += " AND origem = %s"
             params.append(filtro['origem'])
@@ -379,6 +536,15 @@ def editar_patrimonio(id):
                 'id': id
             }
 
+
+            dados['origem'] = dados['origem'].upper()
+
+            dados['origem'] = ''.join(
+                c for c in unicodedata.normalize('NFD', dados['origem'])
+                if unicodedata.category(c) != 'Mn'
+
+    )
+
             # Validar campos obrigatórios
             campos_obrigatorios = ['nome', 'localizacao', 'condicao', 'origem']
             for campo in campos_obrigatorios:
@@ -386,7 +552,6 @@ def editar_patrimonio(id):
                     flash(f'Campo obrigatório não preenchido: {campo}', 'danger')
                     return redirect(url_for('editar_patrimonio', id=id))
 
-            # Validar quantidade
             try:
                 dados['quantidade'] = int(dados['quantidade'])
                 if dados['quantidade'] <= 0:
@@ -445,7 +610,7 @@ def editar_patrimonio(id):
                 campos_update.append("usuario_atualizacao = %s")
                 params.append(session['nome_usuario'])
 
-            # Query final
+                
             query = f"UPDATE patrimonio SET {', '.join(campos_update)} WHERE id = %s"
             params.append(id)
 
@@ -630,75 +795,85 @@ def importar_excel():
         return redirect(url_for('importar_excel'))
 
     try:
-        # Ler arquivo
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(file)
-        else:
-            df = pd.read_excel(file)
-
-        # Validar colunas obrigatórias
-        colunas_obrigatorias = ['nome', 'localizacao', 'condicao', 'quantidade']
-        colunas_faltantes = [col for col in colunas_obrigatorias if col not in df.columns]
+        origem_padrao = request.form.get('defaultOrigin', 'GOVERNOS ESTADUAL').strip().upper()
         
-        if colunas_faltantes:
-            flash(f'Colunas obrigatórias faltando: {", ".join(colunas_faltantes)}', 'danger')
-            return redirect(url_for('importar_excel'))
-
+        if file.filename.endswith('.csv'):
+            dfs = {'Dados': pd.read_csv(file)}
+        else:
+            xls = pd.ExcelFile(file)
+            dfs = {sheet_name: xls.parse(sheet_name) for sheet_name in xls.sheet_names}
+        
         conn = get_db_connection()
         if not conn:
             flash('Erro de conexão com o banco', 'danger')
             return redirect(url_for('importar_excel'))
 
         cursor = conn.cursor()
-        sucessos = 0
-        erros = []
+        total_sucessos = 0
+        total_erros = []
+        abas_processadas = []
 
-        for index, row in df.iterrows():
-            try:
-                # Preparar dados
-                dados = {
-                    'nome': str(row['nome']).strip(),
-                    'localizacao': str(row['localizacao']).strip(),
-                    'condicao': str(row['condicao']).strip(),
-                    'quantidade': int(row['quantidade']),
-                    'descricao': str(row['descricao']).strip() if 'descricao' in df.columns else '',
-                    'origem': str(row['origem']).strip() if 'origem' in df.columns else 'Desconhecida',
-                    'marca': str(row['marca']).strip() if 'marca' in df.columns else '',
-                    'codigo_doador': str(row.get('codigo_doador', '')).strip(),
-                    'codigo_cps': str(row.get('codigo_cps', '')).strip()
-                }
-
-                # Validar dados
-                if not all([dados['nome'], dados['localizacao'], dados['condicao']]):
-                    raise ValueError("Campos obrigatórios em branco")
-
-                # Inserir no banco
-                query = """
-                INSERT INTO patrimonio (
-                    nome, descricao, localizacao, condicao, origem, marca,
-                    codigo_doador, codigo_cps, quantidade, data_cadastro, usuario_cadastro
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s)
-                """
+        for sheet_name, df in dfs.items():
+            if df.empty:
+                continue
                 
-                cursor.execute(query, (
-                    dados['nome'], dados['descricao'], dados['localizacao'],
-                    dados['condicao'], dados['origem'], dados['marca'],
-                    dados['codigo_doador'], dados['codigo_cps'],
-                    dados['quantidade'], session['nome_usuario']
-                ))
-                
-                sucessos += 1
-
-            except Exception as e:
-                erros.append(f"Linha {index + 2}: {str(e)}")
-
+            sucessos_aba = 0
+            erros_aba = []
+            
+            df = df.dropna(how='all')
+            df = df.reset_index(drop=True)
+            
+            for index, row in df.iterrows():
+                try:
+                    dados = extrair_dados_linha(row, sheet_name, origem_padrao)
+                    
+                    if not dados['nome'] or not dados['localizacao']:
+                        continue
+                    
+                    if dados['codigo_doador'] and (len(dados['codigo_doador']) != 7 or not dados['codigo_doador'].isdigit()):
+                        dados['codigo_doador'] = ''
+                    
+                    if dados['codigo_cps'] and (len(dados['codigo_cps']) != 7 or not dados['codigo_cps'].isdigit()):
+                        dados['codigo_cps'] = ''
+                    
+                    condicao_normalizada = normalizar_condicao(dados['condicao'])
+                    
+                    query = """
+                    INSERT INTO patrimonio (
+                        nome, descricao, localizacao, condicao, origem, marca,
+                        codigo_doador, codigo_cps, quantidade, data_cadastro, usuario_cadastro
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s)
+                    """
+                    
+                    cursor.execute(query, (
+                        dados['nome'], dados['descricao'], dados['localizacao'],
+                        condicao_normalizada, dados['origem'], dados['marca'],
+                        dados['codigo_doador'], dados['codigo_cps'],
+                        dados['quantidade'], session['nome_usuario']
+                    ))
+                    
+                    sucessos_aba += 1
+                    
+                except Exception as e:
+                    erros_aba.append(f"Aba {sheet_name}, Linha {index + 2}: {str(e)}")
+            
+            if sucessos_aba > 0:
+                abas_processadas.append(f"{sheet_name} ({sucessos_aba} itens)")
+                total_sucessos += sucessos_aba
+            
+            total_erros.extend(erros_aba)
+        
         conn.commit()
         
-        if sucessos > 0:
-            flash(f'Importação concluída! {sucessos} patrimônios importados com sucesso.', 'success')
-        if erros:
-            flash(f'Erros encontrados: {len(erros)} linhas não puderam ser importadas.', 'warning')
-
+        if total_sucessos > 0:
+            mensagem = f'Importação concluída! {total_sucessos} patrimônios importados de {len(abas_processadas)} abas.'
+            if abas_processadas:
+                mensagem += f' Abas: {", ".join(abas_processadas)}'
+            flash(mensagem, 'success')
+        
+        if total_erros:
+            flash(f'Erros encontrados: {len(total_erros)} linhas não importadas.', 'warning')
+        
         return redirect(url_for('listar'))
 
     except Exception as e:
@@ -709,6 +884,75 @@ def importar_excel():
         if 'conn' in locals() and conn.is_connected():
             cursor.close()
             conn.close()
+
+def extrair_dados_linha(row, sheet_name, origem_padrao):
+    dados = {
+        'nome': '',
+        'descricao': '',
+        'localizacao': sheet_name,
+        'condicao': 'Bom',
+        'origem': origem_padrao,
+        'marca': '',
+        'codigo_doador': '',
+        'codigo_cps': '',
+        'quantidade': 1
+    }
+    
+    for col_name, cell_value in row.items():
+        if pd.isna(cell_value):
+            continue
+            
+        str_value = str(cell_value).strip()
+        col_lower = str(col_name).lower()
+        
+        if any(keyword in col_lower for keyword in ['patrimonio', 'número', 'numero', 'código', 'codigo']):
+            if str_value.isdigit() and len(str_value) == 7:
+                if not dados['codigo_doador']:
+                    dados['codigo_doador'] = str_value
+                elif not dados['codigo_cps']:
+                    dados['codigo_cps'] = str_value
+        
+        elif any(keyword in col_lower for keyword in ['descrição', 'descricao', 'nome']):
+            if not dados['nome']:
+                dados['nome'] = str_value
+            elif not dados['descricao']:
+                dados['descricao'] = str_value
+        
+        elif 'marca' in col_lower:
+            dados['marca'] = str_value
+        
+        elif 'local' in col_lower and str_value and str_value != sheet_name:
+            dados['localizacao'] = str_value
+        
+        elif any(keyword in col_lower for keyword in ['condição', 'condicao', 'condições']):
+            dados['condicao'] = str_value
+        
+        elif 'doador' in col_lower and str_value.isdigit() and len(str_value) == 7:
+            dados['codigo_doador'] = str_value
+    
+    if not dados['nome'] and dados['descricao']:
+        dados['nome'] = dados['descricao'][:100]
+    
+    if "não patrimoniado" in dados['nome'].lower() or "itens não" in dados['nome'].lower():
+        dados['nome'] = dados['nome'].replace("ITENS NÃO PATRIMONIADOS", "").replace("NÃO PATRIMONIADOS", "").strip()
+    
+    dados['origem'] = dados['origem'].upper()
+    
+    return dados
+
+def normalizar_condicao(condicao):
+    condicao_lower = str(condicao).lower().strip()
+    
+    if any(palavra in condicao_lower for palavra in ['ótimo', 'otimo', 'excelente', 'novo']):
+        return 'Ótimo'
+    elif any(palavra in condicao_lower for palavra in ['bom', 'boa', 'regular']):
+        return 'Bom'
+    elif any(palavra in condicao_lower for palavra in ['recuperável', 'recuperavel', 'recuperacao', 'conserto']):
+        return 'Recuperável'
+    elif any(palavra in condicao_lower for palavra in ['péssimo', 'pessimo', 'ruim', 'inutilizavel']):
+        return 'Péssimo'
+    else:
+        return 'Bom'
 
 @app.route('/imagens/<filename>')
 def servir_imagem(filename):
