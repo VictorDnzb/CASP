@@ -918,9 +918,17 @@ def api_stats():
         cursor.execute("SELECT condicao, COUNT(*) as count FROM patrimonio GROUP BY condicao")
         condicoes = cursor.fetchall()
         
+        cursor.execute("SELECT COUNT(DISTINCT localizacao) as total_localizacoes FROM patrimonio")
+        total_localizacoes = cursor.fetchone()['total_localizacoes']
+        
+        cursor.execute("SELECT localizacao, COUNT(*) as count FROM patrimonio GROUP BY localizacao ORDER BY count DESC LIMIT 5")
+        localizacoes = cursor.fetchall()
+        
         return jsonify({
             'total': total,
-            'condicoes': condicoes
+            'condicoes': condicoes,
+            'total_localizacoes': total_localizacoes,
+            'localizacoes': localizacoes
         })
     
     except Exception as e:
@@ -934,53 +942,34 @@ def api_stats():
 def health_check():
     return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
 
-@app.route('/api/patrimonio/<codigo>')
-def api_buscar_patrimonio(codigo):
+
+@app.route('/api/patrimonios')
+def api_patrimonios():
+    if 'usuario' not in session:
+        return jsonify({'error': 'Não autorizado'}), 401
+    
     conn = get_db_connection()
     if not conn:
-        return jsonify({'error': 'Erro de conexão com o banco'}), 500
+        return jsonify({'error': 'Erro de conexão'}), 500
     
     try:
         cursor = conn.cursor(dictionary=True)
-        
         cursor.execute("""
-            SELECT 
-                id, nome, descricao, localizacao, condicao, origem, 
-                marca, codigo_doador, codigo_cps, quantidade,
-                DATE_FORMAT(data_cadastro, '%%d/%%m/%%Y') as data_cadastro_formatada,
-                usuario_cadastro
+            SELECT id, nome, localizacao, condicao, origem, quantidade
             FROM patrimonio 
-            WHERE codigo_cps = %s OR codigo_doador = %s
-            LIMIT 1
-        """, (codigo, codigo))
+            ORDER BY nome
+        """)
+        patrimonios = cursor.fetchall()
         
-        patrimonio = cursor.fetchone()
-        
-        if patrimonio:
-            return jsonify({
-                'success': True,
-                'encontrado': True,
-                'patrimonio': patrimonio,
-                'mensagem': 'Patrimônio encontrado com sucesso'
-            })
-        else:
-            return jsonify({
-                'success': True,
-                'encontrado': False,
-                'patrimonio': None,
-                'mensagem': 'Nenhum patrimônio encontrado com este código'
-            })
-            
+        return jsonify(patrimonios)
+    
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Erro na consulta: {str(e)}'
-        }), 500
-        
+        return jsonify({'error': str(e)}), 500
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
 
 @app.route('/api/patrimonio/scan', methods=['POST'])
 def api_scan_patrimonio():
