@@ -15,13 +15,14 @@
     </div>
     
     <div class="dashboard-grid">
-        <div class="stats-card"><br>
-           <a>1102</a>
-            <div class="stats-label">
-                <i class="fas fa-boxes me-2"></i>
-                Total de Patrimônios
-            </div>
-        </div>
+
+    <div class="stats-card">
+        <div class="stats-number" id="total-count">0</div>
+        <div class="stats-label">
+        <i class="fas fa-boxes me-2"></i>
+        Total de Patrimônios
+    </div>
+</div>
         
         <!-- Card para Ótimo + Bom Estado -->
         <div class="stats-card" style="background: linear-gradient(135deg, #198754 0%, #0a8f3d 100%);">
@@ -180,39 +181,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             
-            // Buscar TODOS os patrimônios para contar localizações únicas
-            fetch('/api/patrimonios')
-                .then(response => response.json())
-                .then(patrimonios => {
-                    console.log('Patrimônios recebidos:', patrimonios);
-                    
-                    const localizacoesUnicas = new Set();
-                    
-                    if (patrimonios && Array.isArray(patrimonios)) {
-                        patrimonios.forEach(patrimonio => {
-                            // Verificar diferentes possíveis nomes do campo localização
-                            const localizacao = patrimonio.localizacao || patrimonio.local || patrimonio.setor || patrimonio.departamento;
-                            if (localizacao && localizacao.trim() !== '') {
-                                localizacoesUnicas.add(localizacao.trim());
-                            }
-                        });
-                    }
-                    
-                    const totalLocalizacoes = localizacoesUnicas.size;
-                    console.log('Localizações únicas encontradas:', totalLocalizacoes, Array.from(localizacoesUnicas));
-                    
-                    // Atualizar os cards
-                    updateCards(bomOtimoCount, recuperavelCount, pessimoCount, totalLocalizacoes, data.total_patrimonios || 0);
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar patrimônios:', error);
-                    // Fallback: usar o número do backend ou contar do top 5
-                    const fallbackLocalizacoes = data.total_localizacoes || {{ stats.localizacoes|length if stats.localizacoes else 0 }};
-                    updateCards(bomOtimoCount, recuperavelCount, pessimoCount, fallbackLocalizacoes, data.total_patrimonios || 0);
-                });
+            // Usar total de localizações da API
+            const totalLocalizacoes = data.total_localizacoes || 0;
+            
+            // Atualizar os cards
+            updateCards(bomOtimoCount, recuperavelCount, pessimoCount, totalLocalizacoes, data.total || 0);
         })
         .catch(error => {
             console.error('Erro ao carregar dados dos cards:', error);
+            // Fallback para dados estáticos
+            updateCards(0, 0, 0, 0, 0);
         });
 
     function updateCards(bomOtimo, recuperavel, pessimo, localizacoes, total) {
@@ -223,19 +201,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('recuperavel-count').textContent = recuperavel;
         document.getElementById('pessimo-count').textContent = pessimo;
         document.getElementById('localizacoes-count').textContent = localizacoes;
-        document.getElementById('total-count').textContent = total;
+        
+        // Buscar o elemento do total de patrimônios
+        const totalElement = document.querySelector('.stats-card:first-child .stats-number');
+        if (totalElement) {
+            totalElement.textContent = total;
+            animateCounter(totalElement, total);
+        }
         
         // Animar os contadores
         animateCounter(document.getElementById('bom-otimo-count'), bomOtimo);
         animateCounter(document.getElementById('recuperavel-count'), recuperavel);
         animateCounter(document.getElementById('pessimo-count'), pessimo);
         animateCounter(document.getElementById('localizacoes-count'), localizacoes);
-        
-        // Se o total já veio animado do backend, não animar de novo
-        const totalElement = document.getElementById('total-count');
-        if (parseInt(totalElement.textContent) !== total) {
-            animateCounter(totalElement, total);
-        }
     }
 
     // Animações dos cards
@@ -246,31 +224,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
     });
 });
-
-// Função para animar contadores
-function animateCounter(element, finalValue, duration = 2000) {
-    const startValue = parseInt(element.textContent) || 0;
-    const startTime = performance.now();
-    
-    // Se já estiver no valor final, não animar
-    if (startValue === finalValue) return;
-    
-    function updateCounter(currentTime) {
-        const elapsedTime = currentTime - startTime;
-        const progress = Math.min(elapsedTime / duration, 1);
-        
-        const currentValue = Math.floor(startValue + (progress * (finalValue - startValue)));
-        element.textContent = currentValue.toLocaleString('pt-BR');
-        
-        if (progress < 1) {
-            requestAnimationFrame(updateCounter);
-        } else {
-            element.textContent = finalValue.toLocaleString('pt-BR');
-        }
-    }
-    
-    requestAnimationFrame(updateCounter);
-
-}
 </script>
 {% endblock %}
