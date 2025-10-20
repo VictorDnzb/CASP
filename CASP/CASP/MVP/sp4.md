@@ -22,6 +22,7 @@
 | ID  | User Story                                                                 | Prioridade | Estimativa |
 |-----|-----------------------------------------------------------------------------|------------|------------|
 | US1 | Como administrador, quero um aplicativo mobile para maior agilidade em cadastrar os itens que estão espalhados na escola.         | Alta       | 6 pontos   |
+| US2 | Como administrador, quero uma inteligência artficial para maior praticidade e usabilidade.         | Alta       | 6 pontos   |
 
 
 ---
