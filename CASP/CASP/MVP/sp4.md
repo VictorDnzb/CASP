@@ -60,3 +60,4 @@
 <img width="955" height="676" alt="dashb1" src="https://github.com/user-attachments/assets/eff254ba-019f-497c-9a9f-aee53fca0226" />
 <img width="955" height="676" alt="dashb2" src="https://github.com/user-attachments/assets/865889c5-31e7-4deb-9bae-52918cf6a1be" />
 <img width="955" height="676" alt="ia" src="https://github.com/user-attachments/assets/a86a1115-85a9-4cf9-9a7c-5637481a8100" />
+<img width="955" height="676" alt="ia" src="https://github.com/user-attachments/assets/5244daae-7413-4cd5-8287-d95d2686c521" />
