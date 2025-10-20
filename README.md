@@ -66,5 +66,5 @@ Este projeto tem como objetivo ajudar e facilitar o cadastramento e alteração 
 | 01                | 12/04/2025 | Concluído| [MVP](CASP/CASP/MVP/sp1.md)  |
 | 02                | 19/05/2025 | Concluído| [MVP](CASP/CASP/MVP/sp2.md)  |
 | 03                | 16/06/2025 | Concluído| [MVP](CASP/CASP/MVP/sp3.md)  |
-| 04                | 22/09/2025 | Em andamento | [MVP](CASP/CASP/MVP/sp4.md)  |
+| 04                | 22/09/2025 | Concluído| [MVP](CASP/CASP/MVP/sp4.md)  |
 
