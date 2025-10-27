@@ -17,10 +17,16 @@ import requests
 import google.generativeai as genai
 from dotenv import load_dotenv
 import bcrypt
+from functools import wraps
 
-app = Flask(__name__)
+
+app = Flask(__name__,
+           template_folder='SRC/templates',
+           static_folder='SRC/static')
+
 CORS(app)
 app.secret_key = 'patrimonio_2024'
+
 
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -37,7 +43,6 @@ DB_CONFIG = {
 print("=" * 60)
 print("🚀 INICIANDO SISTEMA PATRIMÔNIO")
 print("=" * 60)
-
 
 GEMINI_API_KEY = None
 
@@ -82,8 +87,18 @@ def create_upload_folder():
 
 def hash_password(password):
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    hashed = bcrypt.hashpw(password.encode
+    ('utf-8'), salt)
     return hashed.decode('utf-8')
+
+def requer_admin(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('tipo_usuario') != 'admin':
+            flash('Acesso restrito para administradores!', 'error')
+            return redirect(url_for('dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def check_password(password, hashed):
     try:
@@ -99,17 +114,18 @@ def criar_resposta_gemini(mensagem_usuario):
         return "🔧 Assistente não configurado. Configure a chave da API Gemini no arquivo .env"
     
     try:
-        print(f"🔍 Tentando conectar com Gemini...")
+        
+        dados_patrimonio = buscar_dados_para_ia(mensagem_usuario)
+        
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # MODELO ATUALIZADO
         model = genai.GenerativeModel(model_name="gemini-2.5-flash")
         
         generation_config = {
             "temperature": 0.7,
             "top_p": 0.8,
             "top_k": 40,
-            "max_output_tokens": 500,
+            "max_output_tokens": 800,
         }
 
         safety_settings = [
@@ -129,19 +145,167 @@ def criar_resposta_gemini(mensagem_usuario):
         - Origem é sempre em MAIÚSCULAS sem acentos
         - Códigos devem ter exatamente 7 números
 
+        DADOS ATUAIS DO BANCO DE DADOS:
+        {dados_patrimonio}
+
         Seja útil, objetivo e responda em português de forma clara e direta.
+        Use os dados acima para responder perguntas específicas sobre patrimônios.
+
+         **INSTRUÇÕES DE FORMATAÇÃO:**
+        - Use negrito para títulos e informações importantes
+        - Use quebras de linha entre parágrafos constantemente
+        - Use emojis relevantes (🏢, 📊, 🔍, 📝, etc.)
+        - Use listas com marcadores (•) para enumerar itens
+        - Seja claro, objetivo e organizado
 
         PERGUNTA DO USUÁRIO: {mensagem_usuario}
 
-        RESPOSTA:
+
+        RESPOSTA FORMATADA:
         """
 
         response = model.generate_content(prompt)
-        return response.text.strip()
+        
+       
+        resposta_formatada = formatar_resposta_ia(response.text.strip())
+        return resposta_formatada
 
     except Exception as e:
         print(f"Erro no Gemini: {e}")
         return "🤖 Estou com instabilidade no momento. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, condições (Ótimo, Bom, Recuperável, Péssimo) e códigos de 7 números."
+
+
+def formatar_resposta_ia(resposta):
+    """
+    Versão simples para formatar respostas
+    """
+    # Substituições básicas
+    substituicoes = {
+        '**': '<strong>',
+        '*': '<em>',
+        '\n\n': '</p><p>',
+        '\n': '<br>',
+        '• ': '<li>',
+        ' - ': '<li>'
+    }
+    
+    for antigo, novo in substituicoes.items():
+        resposta = resposta.replace(antigo, novo)
+    
+    # Fechar tags de lista
+    resposta = resposta.replace('<li>', '<li>')
+    
+    return f'<p>{resposta}</p>'
+
+def buscar_dados_para_ia(pergunta):
+    """
+    Busca dados relevantes do banco baseado na pergunta do usuário
+    """
+    conn = get_db_connection()
+    if not conn:
+        return "❌ *Erro de conexão com o banco de dados*"
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        pergunta_lower = pergunta.lower()
+        
+        # Análise da pergunta para decidir quais dados buscar
+        if any(palavra in pergunta_lower for palavra in ['quantos', 'total', 'quantidade', 'contar', 'número']):
+            # Buscar estatísticas
+            cursor.execute("SELECT COUNT(*) as total FROM patrimonio")
+            total = cursor.fetchone()['total']
+            
+            cursor.execute("""
+                SELECT condicao, COUNT(*) as count 
+                FROM patrimonio 
+                GROUP BY condicao
+            """)
+            condicoes = cursor.fetchall()
+            
+            return f"""
+            📊 **ESTATÍSTICAS GERAIS**
+            
+            • **Total de patrimônios:** {total}
+            • **Distribuição por condição:**
+               - Ótimo: {next((c['count'] for c in condicoes if c['condicao'] == 'Ótimo'), 0)}
+               - Bom: {next((c['count'] for c in condicoes if c['condicao'] == 'Bom'), 0)}
+               - Recuperável: {next((c['count'] for c in condicoes if c['condicao'] == 'Recuperável'), 0)}
+               - Péssimo: {next((c['count'] for c in condicoes if c['condicao'] == 'Péssimo'), 0)}
+            """
+        
+        elif any(palavra in pergunta_lower for palavra in ['localização', 'localizacao', 'sala', 'laboratório', 'laboratorio']):
+            # Buscar por localização
+            cursor.execute("""
+                SELECT nome, localizacao, condicao, quantidade 
+                FROM patrimonio 
+                ORDER BY localizacao, nome
+                LIMIT 50
+            """)
+            patrimonios = cursor.fetchall()
+            
+            return f"""
+            PATRIMÔNIOS POR LOCALIZAÇÃO (primeiros 50):
+            {[f"{p['localizacao']} - {p['nome']} ({p['condicao']}) - Qtd: {p['quantidade']}" for p in patrimonios]}
+            """
+        
+        elif any(palavra in pergunta_lower for palavra in ['condição', 'condicao', 'estado', 'conservação']):
+            # Buscar por condição
+            cursor.execute("""
+                SELECT nome, condicao, localizacao 
+                FROM patrimonio 
+                ORDER BY condicao, nome
+                LIMIT 50
+            """)
+            patrimonios = cursor.fetchall()
+            
+            return f"""
+            PATRIMÔNIOS POR CONDIÇÃO (primeiros 50):
+            {[f"{p['condicao']} - {p['nome']} - Local: {p['localizacao']}" for p in patrimonios]}
+            """
+        
+        elif any(palavra in pergunta_lower for palavra in ['todos', 'listar', 'mostrar', 'patrimônios']):
+            # Buscar todos os patrimônios (limitado)
+            cursor.execute("""
+                SELECT nome, descricao, localizacao, condicao, origem, quantidade 
+                FROM patrimonio 
+                ORDER BY nome
+                LIMIT 30
+            """)
+            patrimonios = cursor.fetchall()
+            
+            return f"""
+            LISTA DE PATRIMÔNIOS (primeiros 30):
+            {[f"{p['nome']} - {p['localizacao']} - {p['condicao']} - Qtd: {p['quantidade']}" for p in patrimonios]}
+            """
+        
+        else:
+            # Buscar dados gerais para contexto
+            cursor.execute("SELECT COUNT(*) as total FROM patrimonio")
+            total = cursor.fetchone()['total']
+            
+            cursor.execute("""
+                SELECT nome, localizacao, condicao 
+                FROM patrimonio 
+                ORDER BY data_cadastro DESC 
+                LIMIT 10
+            """)
+            recentes = cursor.fetchall()
+            
+            return f"""
+            CONTEXTO GERAL:
+            - Total de patrimônios no sistema: {total}
+            - Patrimônios recentes: {[f"{r['nome']} ({r['localizacao']}) - {r['condicao']}" for r in recentes]}
+            """
+    
+    except Exception as e:
+        print(f"Erro ao buscar dados para IA: {e}")
+        return f"Erro ao acessar banco de dados: {str(e)}"
+    
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
 def criar_usuario_admin():
     conn = get_db_connection()
@@ -157,7 +321,7 @@ def criar_usuario_admin():
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
                 ativo BOOLEAN DEFAULT TRUE,
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             )
         """)
         
@@ -187,45 +351,51 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
+        username = request.form.get('username')  # Mudei para 'username' para não conflitar
         password = request.form.get('password')
+        tipo = request.form.get('tipo')
         
-        if not username or not password:
-            flash('Preencha todos os campos', 'danger')
-            return render_template('login.html')
+        if tipo == 'convidado':
+            # Login como convidado
+            session['usuario'] = 'Convidado'
+            session['tipo_usuario'] = 'convidado'
+            flash('Entrou como convidado. Acesso apenas para visualização.', 'info')
+            return redirect(url_for('dashboard'))
         
-        conn = get_db_connection()
-        if not conn:
-            flash('Erro de conexão com o banco', 'danger')
-            return render_template('login.html')
-        
-        try:
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM usuarios WHERE username = %s AND ativo = TRUE", (username,))
-            usuario = cursor.fetchone()
+        elif tipo == 'admin':
+            # Login como admin - usando mysql-connector em vez de SQLAlchemy
+            conn = get_db_connection()
+            if not conn:
+                flash('Erro de conexão com o banco', 'danger')
+                return render_template('login.html')
             
-            if usuario and check_password(password, usuario['password_hash']):
-                session['usuario'] = usuario['username']
-                session['user_id'] = usuario['id']
-                         
-                flash('Login realizado com sucesso!', 'success')
-                return redirect(url_for('dashboard'))
-            else:
-                flash('Credenciais inválidas', 'danger')
-        
-        except Exception as e:
-            flash(f'Erro no login: {str(e)}', 'danger')
-        finally:
-            if conn.is_connected():
-                cursor.close()
-                conn.close()
+            try:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("SELECT * FROM usuarios WHERE username = %s AND ativo = TRUE", (username,))
+                usuario_db = cursor.fetchone()
+                
+                if usuario_db and check_password(password, usuario_db['password_hash']):
+                    session['usuario'] = usuario_db['username']
+                    session['user_id'] = usuario_db['id']
+                    
+                    flash(f'Login realizado com sucesso! Bem-vindo, {usuario_db["username"]}', 'success')
+                    return redirect(url_for('dashboard'))
+                else:
+                    flash('Credenciais inválidas', 'danger')
+                
+            except Exception as e:
+                flash(f'Erro no login: {str(e)}', 'danger')
+            finally:
+                if conn and conn.is_connected():
+                    cursor.close()
+                    conn.close()
     
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Logout realizado com sucesso', 'info')
     return redirect(url_for('login'))
 
 @app.route('/dashboard')
@@ -289,6 +459,7 @@ def dashboard():
             cursor.close()
             conn.close()
 
+
 @app.route('/cadastro')
 def cadastro():
     if 'usuario' not in session:
@@ -312,7 +483,7 @@ def cadastrar():
         'quantidade': request.form.get('quantidade', '1').strip()
     }
 
-    campos_obrigatorios = ['nome', 'descricao', 'localizacao', 'condicao', 'origem']
+    campos_obrigatorios = ['nome', 'localizacao', 'condicao', 'origem']
     for campo in campos_obrigatorios:
         if not dados[campo]:
             flash(f'Campo obrigatório não preenchido: {campo}', 'danger')
@@ -399,72 +570,88 @@ def listar():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     
+    # Capturar parâmetros de filtro da URL
+    filtro = {
+        'nome': request.args.get('nome', '').strip(),
+        'localizacao': request.args.get('localizacao', '').strip(),
+        'codigo_cps': request.args.get('codigo_cps', '').strip(),
+        'codigo_doador': request.args.get('codigo_doador', '').strip(),
+        'condicao': request.args.get('condicao', '').strip(),
+        'origem': request.args.get('origem', '').strip()
+    }
+    
     conn = get_db_connection()
     if not conn:
         flash("Erro de conexão com o banco", 'danger')
-        return render_template('listar.html', patrimonios=[])
+        return render_template('listar.html', patrimonios=[], filtro=filtro)
     
     try:
         cursor = conn.cursor(dictionary=True)
         
-        cursor.execute("""
+        # Query base
+        query = """
             SELECT 
                 id, nome, descricao, localizacao, condicao, origem,
                 marca, codigo_doador, codigo_cps, quantidade, imagem,
                 DATE_FORMAT(data_cadastro, '%d/%m/%Y %H:%i') as data_cadastro_formatada,
                 usuario_cadastro
             FROM patrimonio 
-            ORDER BY data_cadastro DESC
-        """)
+            WHERE 1=1
+        """
+        params = []
+        
+        # Aplicar filtros
+        if filtro['nome']:
+            query += " AND nome LIKE %s"
+            params.append(f"%{filtro['nome']}%")
+        
+        if filtro['localizacao']:
+            query += " AND localizacao LIKE %s"
+            params.append(f"%{filtro['localizacao']}%")
+        
+        if filtro['codigo_cps']:
+            query += " AND codigo_cps = %s"
+            params.append(filtro['codigo_cps'])
+        
+        if filtro['codigo_doador']:
+            query += " AND codigo_doador = %s"
+            params.append(filtro['codigo_doador'])
+        
+        # Filtro de condição - suporta múltiplas condições separadas por vírgula
+        if filtro['condicao']:
+            condicoes = [cond.strip() for cond in filtro['condicao'].split(',')]
+            placeholders = ','.join(['%s'] * len(condicoes))
+            query += f" AND condicao IN ({placeholders})"
+            params.extend(condicoes)
+        
+        if filtro['origem']:
+            query += " AND origem = %s"
+            params.append(filtro['origem'])
+        
+        # Ordenação
+        query += " ORDER BY data_cadastro DESC"
+        
+        cursor.execute(query, params)
         patrimonios = cursor.fetchall()
         
-        return render_template('listar.html', patrimonios=patrimonios)
+        # Adicionar mensagem informativa sobre o filtro
+        if filtro['condicao']:
+            condicoes_filtro = [cond.strip() for cond in filtro['condicao'].split(',')]
+            if len(condicoes_filtro) > 1:
+                flash(f'Mostrando patrimônios em condições: {", ".join(condicoes_filtro)}', 'info')
+            else:
+                flash(f'Mostrando patrimônios em condição: {condicoes_filtro[0]}', 'info')
+        
+        return render_template('listar.html', patrimonios=patrimonios, filtro=filtro)
         
     except Exception as e:
         flash(f'Erro ao carregar patrimônios: {str(e)}', 'danger')
-        return render_template('listar.html', patrimonios=[])
+        return render_template('listar.html', patrimonios=[], filtro=filtro)
         
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
-@app.route('/deletar/<int:id>', methods=['POST'])
-def deletar_patrimonio(id):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    conn = get_db_connection()
-    if not conn:
-        flash("Erro de conexão com o banco", 'danger')
-        return redirect(url_for('listar'))
-    
-    try:
-        cursor = conn.cursor()
-        
-        cursor.execute("SELECT imagem FROM patrimonio WHERE id = %s", (id,))
-        resultado = cursor.fetchone()
-        
-        cursor.execute("DELETE FROM patrimonio WHERE id = %s", (id,))
-        conn.commit()
-        
-        if resultado and resultado[0]:
-            caminho_imagem = os.path.join(app.config['UPLOAD_FOLDER'], resultado[0])
-            if os.path.exists(caminho_imagem):
-                os.remove(caminho_imagem)
-        
-        flash('Patrimônio deletado com sucesso!', 'success')
-        
-    except Exception as e:
-        conn.rollback()
-        flash(f'Erro ao deletar patrimônio: {str(e)}', 'danger')
-        
-    finally:
-        if conn and conn.is_connected():
-            cursor.close()
-            conn.close()
-    
-    return redirect(url_for('listar'))
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar_patrimonio(id):
@@ -1028,14 +1215,81 @@ def api_status():
     except:
         return jsonify({'status': 'error', 'mensagem': 'Erro de conexão'}), 500
 
+
+
 @app.route('/mobile')
 @app.route('/app')
 def mobile_app():
     return render_template('mobile.html')
 
-@app.route('/qrcode')
-def qrcode_scanner():
-    return render_template('qrcode.html')
+@app.route('/api/mobile/status')
+def mobile_api_status():
+    from datetime import datetime
+    return jsonify({
+        'status': 'online',
+        'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'version': '1.0.0'
+    })
+
+@app.route('/api/mobile/patrimonio/<codigo>')
+def mobile_consultar_patrimonio(codigo):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({
+            'success': False,
+            'error': 'Erro de conexão com o banco'
+        }), 500
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # Buscar por código CPS ou código doador
+        cursor.execute("""
+            SELECT 
+                nome, descricao, localizacao, condicao, origem, 
+                marca, codigo_doador, codigo_cps, quantidade,
+                DATE_FORMAT(data_cadastro, '%d/%m/%Y') as data_cadastro_formatada
+            FROM patrimonio 
+            WHERE codigo_cps = %s OR codigo_doador = %s
+            LIMIT 1
+        """, (codigo, codigo))
+        
+        patrimonio = cursor.fetchone()
+        
+        if patrimonio:
+            return jsonify({
+                'success': True,
+                'encontrado': True,
+                'patrimonio': {
+                    'nome': patrimonio['nome'] or '',
+                    'descricao': patrimonio['descricao'] or '',
+                    'localizacao': patrimonio['localizacao'] or '',
+                    'condicao': patrimonio['condicao'] or '',
+                    'origem': patrimonio['origem'] or '',
+                    'quantidade': patrimonio['quantidade'] or 1,
+                    'marca': patrimonio['marca'] or '',
+                    'codigo_cps': patrimonio['codigo_cps'] or '',
+                    'codigo_doador': patrimonio['codigo_doador'] or '',
+                    'data_cadastro_formatada': patrimonio['data_cadastro_formatada'] or ''
+                }
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'encontrado': False,
+                'mensagem': 'Nenhum patrimônio encontrado com este código'
+            })
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+    
 
 @app.route('/api/chat', methods=['POST'])
 def chat_with_ai():
@@ -1051,7 +1305,7 @@ def chat_with_ai():
         return jsonify({
             'response': resposta,
             'type': 'gemini',
-            'source': 'Google Gemini Pro'
+            'source': 'Google Gemini Flash'
         })
 
     except Exception as e:
@@ -1068,14 +1322,14 @@ def chat_status():
         return jsonify({
             'status': 'online',
             'type': 'google_gemini',
-            'model': 'Gemini 1.5 Pro',  # ATUALIZADO
+            'model': 'Gemini 2.5 Flash',  
             'features': ['IA Gratuita', 'Contexto Patrimonial', 'Respostas Naturais']
         })
     else:
         return jsonify({
             'status': 'offline',
             'type': 'google_gemini',
-            'model': 'Gemini 1.5 Pro', 
+            'model': 'Gemini 2.5 Flash', 
             'features': ['IA Gratuita', 'Contexto Patrimonial', 'Respostas Naturais']
         })
 
