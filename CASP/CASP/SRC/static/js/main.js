@@ -229,7 +229,7 @@ function initializeCharts() {
 
 
 function initializeAnimations() {
-    // Animações de entrada para cards
+    
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -244,12 +244,12 @@ function initializeAnimations() {
         });
     }, observerOptions);
 
-    // Observar elementos para animação
+   
     document.querySelectorAll('.card, .stats-card, .table-responsive').forEach(el => {
         observer.observe(el);
     });
 
-    // Animações para stats cards
+   
     const statsNumbers = document.querySelectorAll('.stats-number');
     statsNumbers.forEach(numberEl => {
         const finalValue = parseInt(numberEl.textContent);
@@ -310,22 +310,29 @@ function initializeChat() {
     }
 
     function addMessage(sender, text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message message-${sender}`;
-        
-        const header = document.createElement('div');
-        header.className = 'message-header';
-        header.textContent = sender === 'user' ? 'Você' : 'Assistente';
-        
-        const content = document.createElement('div');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message message-${sender}`;
+    
+    const header = document.createElement('div');
+    header.className = 'message-header';
+    header.textContent = sender === 'user' ? 'Você' : 'Assistente';
+    
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    
+    
+    if (sender === 'ai') {
+        content.innerHTML = text;  
+    } else {
         content.textContent = text;
-        
-        messageDiv.appendChild(header);
-        messageDiv.appendChild(content);
-        chatMessages.appendChild(messageDiv);
-        
-        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+    
+    messageDiv.appendChild(header);
+    messageDiv.appendChild(content);
+    chatMessages.appendChild(messageDiv);
+    
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
     function showTypingIndicator() {
         const typingDiv = document.createElement('div');
