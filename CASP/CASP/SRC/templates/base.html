@@ -12,13 +12,16 @@
     
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-       <header class="top-bar">
+    <header class="top-bar">
         <div class="logo-bar">
             <img src="{{ url_for('static', filename='images/etec-identidade.jpg') }}" alt="CPS" class="logo">
             <img src="{{ url_for('static', filename='images/cps-logo-identidade.jpg') }}" alt="Etec" class="logo">
             <img src="{{ url_for('static', filename='images/sp.jpeg') }}" alt="Governo SP" class="logo">
         </div>
+    </header>
+
     {% if session.usuario %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow-sm">
         <div class="container">
@@ -39,18 +42,21 @@
                             Dashboard
                         </a>
                     </li>
+                    {% if session.get('tipo_usuario') != 'convidado' %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'cadastro' %}active{% endif %}" href="{{ url_for('cadastro') }}">
                             <i class="fas fa-plus-circle me-1"></i>
                             Cadastrar
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'listar' %}active{% endif %}" href="{{ url_for('listar') }}">
                             <i class="fas fa-list me-1"></i>
                             Listar
                         </a>
                     </li>
+                    {% if session.get('tipo_usuario') != 'convidado' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-file-export me-1"></i>
@@ -69,65 +75,71 @@
                             </a></li>
                         </ul>
                     </li>
+                    {% endif %}
                 </ul>
                 
                 <div class="navbar-nav">
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            {{ session.nome_usuario }}
+                            <i class="fas fa-user me-1"></i>
+                            {{ session.usuario }}
+                            {% if session.get('tipo_usuario') == 'convidado' %}
+                            <span class="badge bg-warning ms-1">Convidado</span>
+                            {% else %}
+                            <span class="badge bg-success ms-1">Admin</span>
+                            {% endif %}
                         </a>
-
-<div class="chat-floating-btn" id="chatToggle">
-    <i class="fas fa-robot"></i>
-</div>
-
-<div class="modal fade" id="chatModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-robot me-2"></i>
-                    Assistente de Patrimônio
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input-container">
-                        <div class="input-group">
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="chatInput" 
-                                   placeholder="Pergunte sobre patrimônios, cadastros, relatórios..."
-                                   maxlength="500">
-                            <button class="btn btn-primary" type="button" id="sendMessage">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                        <small class="text-muted mt-2 d-block">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Pergunte sobre gestão de patrimônio escolar
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</div>
-
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt me-2"></i>Sair
-                            </a></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Sair
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
+
+    <div class="chat-floating-btn" id="chatToggle">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <div class="modal fade" id="chatModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-robot me-2"></i>
+                        Assistente de Patrimônio
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-container">
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="chatInput" 
+                                       placeholder="Pergunte sobre patrimônios, cadastros, relatórios..."
+                                       maxlength="500">
+                                <button class="btn btn-primary" type="button" id="sendMessage">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Pergunte sobre gestão de patrimônio escolar
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {% endif %}
 
     <main class="{% if session.usuario %}container-fluid py-4{% else %}d-flex align-items-center min-vh-100{% endif %}">
