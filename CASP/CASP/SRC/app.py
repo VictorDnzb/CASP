@@ -1291,6 +1291,45 @@ def mobile_consultar_patrimonio(codigo):
             conn.close()
     
 
+@app.route('/alterar', methods=['GET', 'POST'])
+def alterar_senha():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        senha_atual = request.form.get('senha_atual')
+        nova_senha = request.form.get('nova_senha')
+        confirmar_senha = request.form.get('confirmar_senha')
+        
+        if nova_senha != confirmar_senha:
+            flash('As novas senhas não coincidem', 'danger')
+            return render_template('alterar_senha.html')
+        
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT password_hash FROM usuarios WHERE username = %s", (session['usuario'],))
+            usuario = cursor.fetchone()
+            
+            if usuario and check_password(senha_atual, usuario['password_hash']):
+                nova_senha_hash = hash_password(nova_senha)
+                cursor.execute("UPDATE usuarios SET password_hash = %s WHERE username = %s", 
+                             (nova_senha_hash, session['usuario']))
+                conn.commit()
+                flash('Senha alterada com sucesso!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Senha atual incorreta', 'danger')
+                
+        except Exception as e:
+            flash(f'Erro ao alterar senha: {str(e)}', 'danger')
+        finally:
+            if conn and conn.is_connected():
+                cursor.close()
+                conn.close()
+    
+    return render_template('alterar_senha.html')
+
 @app.route('/api/chat', methods=['POST'])
 def chat_with_ai():
     try:
