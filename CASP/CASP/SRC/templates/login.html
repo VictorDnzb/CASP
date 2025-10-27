@@ -10,60 +10,112 @@
                 <i class="fas fa-school mb-3 d-block" style="font-size: 3rem;"></i>
                 Sistema de Patrimônio Escolar
             </h2>
-            <p class="mb-0 mt-2 opacity-75">Faça login para acessar o sistema</p>
+            <p class="mb-0 mt-2 opacity-75">Escolha o tipo de acesso</p>
         </div>
         
         <div class="login-body">
-            <form method="POST" class="needs-validation" novalidate>
-                <div class="mb-4">
-                    <label for="username" class="form-label">
-                        <i class="fas fa-user me-2"></i>Usuário
-                    </label>
-                    <input type="text" 
-                           class="form-control form-control-lg" 
-                           id="username" 
-                           name="username" 
-                           placeholder="Digite seu usuário"
-                           required
-                           autocomplete="username">
-                    <div class="invalid-feedback">
-                        Por favor, digite seu usuário.
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="password" class="form-label">
-                        <i class="fas fa-lock me-2"></i>Senha
-                    </label>
-                    <div class="input-group">
-                        <input type="password" 
+            <!-- Acesso Administrativo -->
+            <div class="mb-4">
+                <h5 class="text-center mb-3">Acesso Administrativo</h5>
+                <form method="POST" class="needs-validation" novalidate>
+                    <input type="hidden" name="tipo" value="admin">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user me-2"></i>Usuário
+                        </label>
+                        <input type="text" 
                                class="form-control form-control-lg" 
-                               id="password" 
-                               name="password" 
-                               placeholder="Digite sua senha"
+                               id="username" 
+                               name="username" 
+                               placeholder="Digite seu usuário"
                                required
-                               autocomplete="current-password">
-                        <button class="btn btn-outline-secondary" 
-                                type="button" 
-                                id="togglePassword"
-                                data-bs-toggle="tooltip"
-                                title="Mostrar/Ocultar senha">
-                            <i class="fas fa-eye"></i>
+                               autocomplete="username">
+                        <div class="invalid-feedback">
+                            Por favor, digite seu usuário.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Senha
+                        </label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   class="form-control form-control-lg" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Digite sua senha"
+                                   required
+                                   autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" 
+                                    type="button" 
+                                    id="togglePassword"
+                                    data-bs-toggle="tooltip"
+                                    title="Mostrar/Ocultar senha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            Por favor, digite sua senha.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Entrar como Admin
                         </button>
                     </div>
-                    <div class="invalid-feedback">
-                        Por favor, digite sua senha.
+                </form>
+            </div>
+
+            <hr>
+
+            <!-- Acesso Convidado -->
+            <div>
+                <h5 class="text-center mb-3">Acesso como Convidado</h5>
+                <p class="text-muted text-center small mb-3">
+                    Visualize os patrimônios sem fazer alterações
+                </p>
+                <form method="POST">
+                    <input type="hidden" name="tipo" value="convidado">
+                    <input type="hidden" name="username" value="convidado">
+                    <input type="hidden" name="password" value="convidado123">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-eye me-2"></i>
+                            Entrar como Convidado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Informações sobre os acessos -->
+        <div class="login-footer mt-4">
+            <div class="card bg-light">
+                <div class="card-body py-3">
+                    <h6 class="mb-2"><i class="fas fa-info-circle me-2 text-info"></i>Informações de Acesso</h6>
+                    <div class="row small">
+                        <div class="col-6">
+                            <strong>Admin:</strong>
+                            <ul class="list-unstyled mt-1">
+                                <li><i class="fas fa-check text-success me-1"></i>Cadastrar</li>
+                                <li><i class="fas fa-check text-success me-1"></i>Editar</li>
+                                <li><i class="fas fa-check text-success me-1"></i>Importar</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <strong>Convidado:</strong>
+                            <ul class="list-unstyled mt-1">
+                                <li><i class="fas fa-check text-success me-1"></i>Visualizar</li>
+                                <li><i class="fas fa-check text-success me-1"></i>Filtrar</li>
+                                <li><i class="fas fa-times text-danger me-1"></i>Sem edição</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-sign-in-alt me-2"></i>
-                        Entrar
-                    </button>
-                </div>
-            </form>
-            
+            </div>
         </div>
     </div>
 </div>
@@ -91,16 +143,24 @@ document.addEventListener('DOMContentLoaded', function() {
         usernameInput.focus();
     }
     
-    const form = document.querySelector('form');
-    if (form) {
+    // Loading para ambos os formulários
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
         form.addEventListener('submit', function(e) {
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
-                submitBtn.innerHTML = '<span class="loading"></span> Entrando...';
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Entrando...';
                 submitBtn.disabled = true;
+                
+                // Revert after 3 seconds if there's an error
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
             }
         });
-    }
+    });
 });
 </script>
 {% endblock %}
