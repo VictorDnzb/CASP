@@ -15,7 +15,7 @@
     
     <div class="filter-section">
         <form method="GET" class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="nome" class="form-label">Nome</label>
                 <input type="text" 
                        class="form-control" 
@@ -25,7 +25,7 @@
                        placeholder="Buscar por nome">
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="localizacao" class="form-label">Localização</label>
                 <input type="text" 
                        class="form-control" 
@@ -33,6 +33,26 @@
                        name="localizacao" 
                        value="{{ filtro.localizacao or '' }}"
                        placeholder="Buscar por localização">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="codigo_cps" class="form-label">Código CPS</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="codigo_cps" 
+                       name="codigo_cps" 
+                       value="{{ filtro.codigo_cps or '' }}"
+                       placeholder="Código CPS">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="codigo_doador" class="form-label">Código Doador</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="codigo_doador" 
+                       name="codigo_doador" 
+                       value="{{ filtro.codigo_doador or '' }}"
+                       placeholder="Código Doador">
             </div>
             
             <div class="col-md-2">
@@ -46,24 +66,50 @@
                 </select>
             </div>
             
-            <div class="col-md-2">
-                <label for="origem" class="form-label">Origem</label>
-                <select class="form-select" id="origem" name="origem">
-                    <option value="">Todas</option>
-                    <option value="CPS" {% if filtro.origem == 'CPS' %}selected{% endif %}>CPS</option>
-                    <option value="Doação" {% if filtro.origem == 'Doação' %}selected{% endif %}>Doação</option>
-                </select>
-            </div>
+    <div class="col-md-2">
+         <label for="origem" class="form-label">Origem</label>
+         <select class="form-select" id="origem" name="origem">
+           <option value="">Todas</option>
+           <option value="CPS" {% if filtro.origem == 'CPS' %}selected{% endif %}>CPS</option>
+           <option value="DOAÇÃO" {% if filtro.origem == 'DOAÇÃO' %}selected{% endif %}>Doação</option>
+           <option value="GOVERNO ESTADUAL" {% if filtro.origem == 'GOVERNO ESTADUAL' %}selected{% endif %}>Governo Estadual</option>
+           <option value="PREFEITURA" {% if filtro.origem == 'PREFEITURA' %}selected{% endif %}>Prefeitura</option>
+    </select>
+</div>
             
-            <div class="col-md-2 d-flex align-items-end">
-                <div class="btn-group w-100">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div class="btn-group">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search me-2"></i>Filtrar
                     </button>
                     <a href="{{ url_for('listar') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i>
+                        <i class="fas fa-times me-2"></i>Limpar
                     </a>
                 </div>
+                
+                {% if filtro.nome or filtro.localizacao or filtro.codigo_cps or filtro.codigo_doador or filtro.condicao or filtro.origem %}
+                <div class="filtros-ativos">
+                    <small class="text-muted">Filtros ativos:</small>
+                    {% if filtro.nome %}
+                    <span class="badge bg-primary ms-1">Nome: {{ filtro.nome }}</span>
+                    {% endif %}
+                    {% if filtro.localizacao %}
+                    <span class="badge bg-primary ms-1">Local: {{ filtro.localizacao }}</span>
+                    {% endif %}
+                    {% if filtro.codigo_cps %}
+                    <span class="badge bg-info ms-1">CPS: {{ filtro.codigo_cps }}</span>
+                    {% endif %}
+                    {% if filtro.codigo_doador %}
+                    <span class="badge bg-info ms-1">Doador: {{ filtro.codigo_doador }}</span>
+                    {% endif %}
+                    {% if filtro.condicao %}
+                    <span class="badge bg-warning ms-1">Condição: {{ filtro.condicao }}</span>
+                    {% endif %}
+                    {% if filtro.origem %}
+                    <span class="badge bg-success ms-1">Origem: {{ filtro.origem }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </form>
     </div>
@@ -92,10 +138,10 @@
                             <th>Imagem</th>
                             <th>Nome</th>
                             <th>Localização</th>
+                            <th>Código CPS</th>
+                            <th>Código Doador</th>
                             <th>Condição</th>
-                            <th>Quantidade</th>
                             <th>Origem</th>
-                            <th>Data Cadastro</th>
                             <th class="text-center">Ações</th>
                         </tr>
                     </thead>
@@ -127,19 +173,25 @@
                             </td>
                             <td>{{ patrimonio.localizacao }}</td>
                             <td>
+                                {% if patrimonio.codigo_cps %}
+                                <span class="badge bg-info">{{ patrimonio.codigo_cps }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if patrimonio.codigo_doador %}
+                                <span class="badge bg-secondary">{{ patrimonio.codigo_doador }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 <span class="badge {% if patrimonio.condicao == 'Ótimo' %}bg-success{% elif patrimonio.condicao == 'Bom' %}bg-primary{% elif patrimonio.condicao == 'Recuperável' %}bg-warning{% else %}bg-danger{% endif %}">
                                     {{ patrimonio.condicao }}
                                 </span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-info">{{ patrimonio.quantidade }}</span>
-                            </td>
                             <td>{{ patrimonio.origem }}</td>
-                            <td>
-                                {% if patrimonio.data_cadastro %}
-                                {{ patrimonio.data_cadastro.strftime('%d/%m/%Y') }}
-                                {% endif %}
-                            </td>
                             
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
@@ -169,6 +221,12 @@
                                             <p><strong>Descrição:</strong> {{ patrimonio.descricao }}</p>
                                             <p><strong>Localização:</strong> {{ patrimonio.localizacao }}</p>
                                             <p><strong>Condição:</strong> {{ patrimonio.condicao }}</p>
+                                            {% if patrimonio.codigo_cps %}
+                                            <p><strong>Código CPS:</strong> {{ patrimonio.codigo_cps }}</p>
+                                            {% endif %}
+                                            {% if patrimonio.codigo_doador %}
+                                            <p><strong>Código Doador:</strong> {{ patrimonio.codigo_doador }}</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -197,7 +255,7 @@
                 <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
                 <h4 class="text-muted">Nenhum patrimônio encontrado</h4>
                 <p class="text-muted">
-                    {% if filtro.nome or filtro.localizacao or filtro.condicao or filtro.origem %}
+                    {% if filtro.nome or filtro.localizacao or filtro.codigo_cps or filtro.codigo_doador or filtro.condicao or filtro.origem %}
                     Tente ajustar os filtros de busca ou 
                     <a href="{{ url_for('listar') }}" class="text-decoration-none">limpar filtros</a>
                     {% else %}
@@ -219,7 +277,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Busca com Enter
+   
     const searchInputs = document.querySelectorAll('input[type="text"]');
     searchInputs.forEach(input => {
         input.addEventListener('keypress', function(e) {
@@ -229,13 +287,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Elementos de controle
+   
     const verMaisBtn = document.getElementById('ver-mais-btn');
     const verMenosBtn = document.getElementById('ver-menos-btn');
     const todosPatrimonios = document.querySelectorAll('.patrimonio-row');
     const LIMITE_INICIAL = 5;
 
-    // Função para mostrar mais itens
+   
     function mostrarMais() {
         todosPatrimonios.forEach(row => {
             row.classList.remove('hidden');
@@ -248,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (verMenosBtn) verMenosBtn.style.display = 'inline-block';
     }
 
-    // Função para mostrar menos itens
+    
     function mostrarMenos() {
         todosPatrimonios.forEach(row => {
             if (parseInt(row.dataset.index) > LIMITE_INICIAL) {
@@ -260,14 +318,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (verMaisBtn) verMaisBtn.style.display = 'inline-block';
         if (verMenosBtn) verMenosBtn.style.display = 'none';
         
-        // Scroll suave para o topo da tabela
+        
         document.querySelector('table').scrollIntoView({ 
             behavior: 'smooth', 
             block: 'start' 
         });
     }
 
-    // Event listeners
+    
     if (verMaisBtn) {
         verMaisBtn.addEventListener('click', mostrarMais);
     }
@@ -276,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
         verMenosBtn.addEventListener('click', mostrarMenos);
     }
 
-    // Animações de entrada para os primeiros itens
+   
     const primeirasLinhas = document.querySelectorAll('.patrimonio-row:not(.hidden)');
     primeirasLinhas.forEach((row, index) => {
         setTimeout(() => {
@@ -284,19 +342,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
     });
 
-    // Tooltips
+  
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Atalhos de teclado
+    
     document.addEventListener('keydown', function(e) {
-        // ESC para ver menos
+        
         if (e.key === 'Escape' && verMenosBtn.style.display !== 'none') {
             mostrarMenos();
         }
-        // Espaço para ver mais/alternar
+    
         if (e.key === ' ' && !e.target.matches('input, textarea, select')) {
             e.preventDefault();
             if (verMaisBtn.style.display !== 'none') {
@@ -308,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// CSS para animações e estilos
+
 const style = document.createElement('style');
 style.textContent = `
     .hidden {
@@ -361,6 +419,13 @@ style.textContent = `
     
     .patrimonio-row.fade-in:nth-child(even) {
         background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    .filtros-ativos {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
     }
 `;
 document.head.appendChild(style);
