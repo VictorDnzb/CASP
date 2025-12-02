@@ -34,4 +34,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-show tables;
+INSERT INTO usuarios (username, password_hash, ativo) 
+VALUES ('admin', 'senha123', TRUE);
+
+INSERT INTO usuarios (username, password_hash, ativo) 
+VALUES ('EtecIlza', 'senha123', TRUE);
+
+select * from usuarios;
+
