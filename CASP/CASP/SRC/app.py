@@ -100,11 +100,19 @@ def requer_admin(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def check_password(password, hashed):
+
+
+def check_password(password, password_hash):
+    """Verifica se a senha corresponde ao hash"""
     try:
-        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        if password_hash.startswith('$2b$') or password_hash.startswith('$2y$'):
+            # Hash bcrypt
+            return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+        else:
+            # Hash simples (para desenvolvimento)
+            return password == password_hash
     except Exception as e:
-        print(f"Erro na verificação de senha: {e}")
+        print(f"Erro ao verificar senha: {e}")
         return False
 
 def criar_resposta_gemini(mensagem_usuario):
@@ -136,33 +144,34 @@ def criar_resposta_gemini(mensagem_usuario):
         ]
 
         prompt = f"""
-        Você é um assistente especializado no sistema de Gestão de Patrimônio Escolar da ETEC Ilza Nascimento Pintus.
+    Você é um assistente especializado no sistema de Gestão de Patrimônio Escolar.
 
-        CONTEXTO DO SISTEMA:
-        - Cadastro de patrimônios com: nome, descrição, localização, condição, origem, marca, código doador (7 números), código CPS (7 números), quantidade
-        - Condições possíveis: Ótimo, Bom, Recuperável, Péssimo
-        - Funcionalidades: Cadastrar, Listar, Editar, Deletar, Relatório PDF, Importar Excel, Dashboard
-        - Origem é sempre em MAIÚSCULAS sem acentos
-        - Códigos devem ter exatamente 7 números
+    CONTEXTO DO SISTEMA:
+    - Sistema completo de cadastro de patrimônios
+    - Dados disponíveis: nome, descrição, localização, condição, origem, marca, códigos, quantidade
+    - Localizações incluem: salas, laboratórios, corredores, buraco da escada, etc.
 
-        DADOS ATUAIS DO BANCO DE DADOS:
-        {dados_patrimonio}
+    DADOS ATUAIS DO BANCO DE DADOS:
+    {dados_patrimonio}
 
-        Seja útil, objetivo e responda em português de forma clara e direta.
-        Use os dados acima para responder perguntas específicas sobre patrimônios.
+    INSTRUÇÕES IMPORTANTES:
+    1. Use APENAS os dados fornecidos acima para responder
+    2. Se a informação não estiver nos dados, diga claramente "Não encontrei essa informação nos dados atuais"
+    3. Para perguntas sobre localizações específicas, verifique se há dados daquela localização
+    4. Seja honesto quando não tiver dados suficientes
+    5. Para perguntas como "quantos patrimônios ótimos no buraco da escada", verifique a seção correspondente nos dados
 
-         **INSTRUÇÕES DE FORMATAÇÃO:**
-        - Use negrito para títulos e informações importantes
-        - Use quebras de linha entre parágrafos constantemente
-        - Use emojis relevantes (🏢, 📊, 🔍, 📝, etc.)
-        - Use listas com marcadores (•) para enumerar itens
-        - Seja claro, objetivo e organizado
+    FORMATO DA RESPOSTA:
+    - Use negrito para títulos principais
+    - Use emojis relevantes
+    - Seja claro e direto
+    - Use listas quando apropriado
+    - Mantenha-se nos dados disponíveis
 
-        PERGUNTA DO USUÁRIO: {mensagem_usuario}
+    PERGUNTA DO USUÁRIO: {mensagem_usuario}
 
-
-        RESPOSTA FORMATADA:
-        """
+    RESPOSTA BASEADA NOS DADOS:
+    """
 
         response = model.generate_content(prompt)
         
@@ -173,6 +182,52 @@ def criar_resposta_gemini(mensagem_usuario):
     except Exception as e:
         print(f"Erro no Gemini: {e}")
         return "🤖 Estou com instabilidade no momento. Posso ajudar com: cadastro de patrimônios, relatórios PDF, importação Excel, condições (Ótimo, Bom, Recuperável, Péssimo) e códigos de 7 números."
+
+
+def buscar_patrimonios_detalhados(filtros=None):
+    """
+    Busca avançada de patrimônios com filtros
+    """
+    conn = get_db_connection()
+    if not conn:
+        return None
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT nome, descricao, localizacao, condicao, origem, 
+                   marca, codigo_doador, codigo_cps, quantidade, data_cadastro
+            FROM patrimonio 
+            WHERE 1=1
+        """
+        params = []
+        
+        if filtros:
+            if 'localizacao' in filtros:
+                query += " AND LOWER(localizacao) LIKE LOWER(%s)"
+                params.append(f'%{filtros["localizacao"]}%')
+            
+            if 'condicao' in filtros:
+                query += " AND condicao = %s"
+                params.append(filtros['condicao'])
+            
+            if 'origem' in filtros:
+                query += " AND origem = %s"
+                params.append(filtros['origem'])
+        
+        query += " ORDER BY localizacao, nome"
+        
+        cursor.execute(query, params)
+        return cursor.fetchall()
+        
+    except Exception as e:
+        print(f"Erro na busca avançada: {e}")
+        return None
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
 
 def formatar_resposta_ia(resposta):
@@ -199,7 +254,7 @@ def formatar_resposta_ia(resposta):
 
 def buscar_dados_para_ia(pergunta):
     """
-    Busca dados relevantes do banco baseado na pergunta do usuário
+    Busca TODOS os dados do patrimônio de forma completa
     """
     conn = get_db_connection()
     if not conn:
@@ -207,100 +262,111 @@ def buscar_dados_para_ia(pergunta):
     
     try:
         cursor = conn.cursor(dictionary=True)
-        
         pergunta_lower = pergunta.lower()
         
-        # Análise da pergunta para decidir quais dados buscar
-        if any(palavra in pergunta_lower for palavra in ['quantos', 'total', 'quantidade', 'contar', 'número']):
-            # Buscar estatísticas
-            cursor.execute("SELECT COUNT(*) as total FROM patrimonio")
-            total = cursor.fetchone()['total']
-            
-            cursor.execute("""
-                SELECT condicao, COUNT(*) as count 
-                FROM patrimonio 
-                GROUP BY condicao
-            """)
-            condicoes = cursor.fetchall()
-            
-            return f"""
-            📊 **ESTATÍSTICAS GERAIS**
-            
-            • **Total de patrimônios:** {total}
-            • **Distribuição por condição:**
-               - Ótimo: {next((c['count'] for c in condicoes if c['condicao'] == 'Ótimo'), 0)}
-               - Bom: {next((c['count'] for c in condicoes if c['condicao'] == 'Bom'), 0)}
-               - Recuperável: {next((c['count'] for c in condicoes if c['condicao'] == 'Recuperável'), 0)}
-               - Péssimo: {next((c['count'] for c in condicoes if c['condicao'] == 'Péssimo'), 0)}
-            """
+        print(f"🔍 [DEBUG] Buscando dados para: {pergunta}")
+
+        # BUSCA COMPLETA - SEMPRE retorna todos os dados organizados
+        print("🎯 [DEBUG] Buscando dados completos do patrimônio")
         
-        elif any(palavra in pergunta_lower for palavra in ['localização', 'localizacao', 'sala', 'laboratório', 'laboratorio']):
-            # Buscar por localização
-            cursor.execute("""
-                SELECT nome, localizacao, condicao, quantidade 
-                FROM patrimonio 
-                ORDER BY localizacao, nome
-                LIMIT 50
-            """)
-            patrimonios = cursor.fetchall()
-            
-            return f"""
-            PATRIMÔNIOS POR LOCALIZAÇÃO (primeiros 50):
-            {[f"{p['localizacao']} - {p['nome']} ({p['condicao']}) - Qtd: {p['quantidade']}" for p in patrimonios]}
-            """
+        # DADOS GERAIS
+        cursor.execute("SELECT COUNT(*) as total FROM patrimonio")
+        total_geral = cursor.fetchone()['total']
         
-        elif any(palavra in pergunta_lower for palavra in ['condição', 'condicao', 'estado', 'conservação']):
-            # Buscar por condição
-            cursor.execute("""
-                SELECT nome, condicao, localizacao 
-                FROM patrimonio 
-                ORDER BY condicao, nome
-                LIMIT 50
-            """)
-            patrimonios = cursor.fetchall()
-            
-            return f"""
-            PATRIMÔNIOS POR CONDIÇÃO (primeiros 50):
-            {[f"{p['condicao']} - {p['nome']} - Local: {p['localizacao']}" for p in patrimonios]}
-            """
+        # POR LOCALIZAÇÃO
+        cursor.execute("""
+            SELECT localizacao, COUNT(*) as total, SUM(quantidade) as total_qtd
+            FROM patrimonio 
+            GROUP BY localizacao
+            ORDER BY total DESC
+        """)
+        por_localizacao = cursor.fetchall()
         
-        elif any(palavra in pergunta_lower for palavra in ['todos', 'listar', 'mostrar', 'patrimônios']):
-            # Buscar todos os patrimônios (limitado)
-            cursor.execute("""
-                SELECT nome, descricao, localizacao, condicao, origem, quantidade 
-                FROM patrimonio 
-                ORDER BY nome
-                LIMIT 30
-            """)
-            patrimonios = cursor.fetchall()
-            
-            return f"""
-            LISTA DE PATRIMÔNIOS (primeiros 30):
-            {[f"{p['nome']} - {p['localizacao']} - {p['condicao']} - Qtd: {p['quantidade']}" for p in patrimonios]}
-            """
+        # POR CONDIÇÃO
+        cursor.execute("""
+            SELECT condicao, COUNT(*) as total, SUM(quantidade) as total_qtd
+            FROM patrimonio 
+            GROUP BY condicao
+            ORDER BY condicao
+        """)
+        por_condicao = cursor.fetchall()
         
-        else:
-            # Buscar dados gerais para contexto
-            cursor.execute("SELECT COUNT(*) as total FROM patrimonio")
-            total = cursor.fetchone()['total']
-            
-            cursor.execute("""
-                SELECT nome, localizacao, condicao 
-                FROM patrimonio 
-                ORDER BY data_cadastro DESC 
-                LIMIT 10
-            """)
-            recentes = cursor.fetchall()
-            
-            return f"""
-            CONTEXTO GERAL:
-            - Total de patrimônios no sistema: {total}
-            - Patrimônios recentes: {[f"{r['nome']} ({r['localizacao']}) - {r['condicao']}" for r in recentes]}
-            """
+        # POR LOCALIZAÇÃO E CONDIÇÃO (para perguntas específicas)
+        cursor.execute("""
+            SELECT localizacao, condicao, COUNT(*) as total
+            FROM patrimonio 
+            GROUP BY localizacao, condicao
+            ORDER BY localizacao, condicao
+        """)
+        por_local_condicao = cursor.fetchall()
+        
+        # ITENS SEM CÓDIGOS
+        cursor.execute("SELECT COUNT(*) as total FROM patrimonio WHERE codigo_cps IS NULL OR codigo_cps = ''")
+        sem_codigo_cps = cursor.fetchone()['total']
+        
+        cursor.execute("SELECT COUNT(*) as total FROM patrimonio WHERE codigo_doador IS NULL OR codigo_doador = ''")
+        sem_codigo_doador = cursor.fetchone()['total']
+        
+        # TODOS OS PATRIMÔNIOS
+        cursor.execute("""
+            SELECT nome, descricao, localizacao, condicao, origem, 
+                   marca, codigo_doador, codigo_cps, quantidade, data_cadastro
+            FROM patrimonio 
+            ORDER BY localizacao, nome
+        """)
+        todos_patrimonios = cursor.fetchall()
+        
+        # ÚLTIMOS CADASTROS
+        cursor.execute("""
+            SELECT nome, localizacao, condicao, data_cadastro
+            FROM patrimonio 
+            ORDER BY data_cadastro DESC 
+            LIMIT 10
+        """)
+        ultimos_cadastros = cursor.fetchall()
+        
+        # MONTAR RELATÓRIO COMPLETO
+        resultado = "🏢 **DADOS COMPLETOS DO PATRIMÔNIO**\n\n"
+        
+        resultado += f"• **TOTAL DE PATRIMÔNIOS:** {total_geral}\n\n"
+        
+        resultado += "• **DISTRIBUIÇÃO POR LOCALIZAÇÃO:**\n"
+        for local in por_localizacao:
+            resultado += f"   - {local['localizacao']}: {local['total']} itens ({local['total_qtd']} unidades)\n"
+        
+        resultado += "\n• **DISTRIBUIÇÃO POR CONDIÇÃO:**\n"
+        for cond in por_condicao:
+            resultado += f"   - {cond['condicao']}: {cond['total']} itens ({cond['total_qtd']} unidades)\n"
+        
+        resultado += "\n• **DETALHES POR LOCALIZAÇÃO E CONDIÇÃO:**\n"
+        local_atual = ""
+        for item in por_local_condicao:
+            if item['localizacao'] != local_atual:
+                resultado += f"   **{item['localizacao']}:**\n"
+                local_atual = item['localizacao']
+            resultado += f"     - {item['condicao']}: {item['total']} itens\n"
+        
+        resultado += f"\n• **ITENS SEM CÓDIGOS:**\n"
+        resultado += f"   - Sem código CPS: {sem_codigo_cps}\n"
+        resultado += f"   - Sem código doador: {sem_codigo_doador}\n"
+        
+        resultado += "\n• **ÚLTIMOS 10 CADASTROS:**\n"
+        for cadastro in ultimos_cadastros:
+            data_cad = cadastro['data_cadastro'].strftime("%d/%m/%Y") if cadastro['data_cadastro'] else "N/D"
+            resultado += f"   - {cadastro['nome']} | {cadastro['localizacao']} | {cadastro['condicao']} | {data_cad}\n"
+        
+        resultado += f"\n• **LISTA COMPLETA ({len(todos_patrimonios)} itens):**\n"
+        for patrimonio in todos_patrimonios:
+            codigo_cps = patrimonio['codigo_cps'] or "N/A"
+            codigo_doador = patrimonio['codigo_doador'] or "N/A"
+            resultado += f"   - {patrimonio['nome']} | {patrimonio['localizacao']} | {patrimonio['condicao']} | Qtd: {patrimonio['quantidade']} | CPS: {codigo_cps} | Doador: {codigo_doador}\n"
+        
+        print(f"📦 [DEBUG] Retornando dados completos com {len(todos_patrimonios)} patrimônios")
+        return resultado
     
     except Exception as e:
-        print(f"Erro ao buscar dados para IA: {e}")
-        return f"Erro ao acessar banco de dados: {str(e)}"
+        print(f"❌ [DEBUG] Erro ao buscar dados: {e}")
+        return f"❌ Erro ao acessar banco de dados: {str(e)}"
     
     finally:
         if conn and conn.is_connected():
@@ -351,19 +417,19 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')  # Mudei para 'username' para não conflitar
+        username = request.form.get('username')
         password = request.form.get('password')
         tipo = request.form.get('tipo')
         
+        print(f"Tentativa de login: tipo={tipo}, username={username}")  # Debug
+        
         if tipo == 'convidado':
-            # Login como convidado
             session['usuario'] = 'Convidado'
             session['tipo_usuario'] = 'convidado'
             flash('Entrou como convidado. Acesso apenas para visualização.', 'info')
             return redirect(url_for('dashboard'))
         
         elif tipo == 'admin':
-            # Login como admin - usando mysql-connector em vez de SQLAlchemy
             conn = get_db_connection()
             if not conn:
                 flash('Erro de conexão com o banco', 'danger')
@@ -374,17 +440,27 @@ def login():
                 cursor.execute("SELECT * FROM usuarios WHERE username = %s AND ativo = TRUE", (username,))
                 usuario_db = cursor.fetchone()
                 
-                if usuario_db and check_password(password, usuario_db['password_hash']):
-                    session['usuario'] = usuario_db['username']
-                    session['user_id'] = usuario_db['id']
+                print(f"Usuário encontrado: {usuario_db}")  # Debug
+                
+                if usuario_db:
+                    print(f"Hash no banco: {usuario_db['password_hash']}")  # Debug
+                    print(f"Senha fornecida: {password}")  # Debug
                     
-                    flash(f'Login realizado com sucesso! Bem-vindo, {usuario_db["username"]}', 'success')
-                    return redirect(url_for('dashboard'))
+                    if check_password(password, usuario_db['password_hash']):
+                        session['usuario'] = usuario_db['username']
+                        session['user_id'] = usuario_db['id']
+                        session['tipo_usuario'] = 'admin'
+                        
+                        flash(f'Login realizado com sucesso! Bem-vindo, {usuario_db["username"]}', 'success')
+                        return redirect(url_for('dashboard'))
+                    else:
+                        flash('Credenciais inválidas - senha incorreta', 'danger')
                 else:
-                    flash('Credenciais inválidas', 'danger')
+                    flash('Usuário não encontrado ou inativo', 'danger')
                 
             except Exception as e:
                 flash(f'Erro no login: {str(e)}', 'danger')
+                print(f"Erro completo: {e}")  # Debug
             finally:
                 if conn and conn.is_connected():
                     cursor.close()
@@ -503,15 +579,6 @@ def cadastrar():
         if unicodedata.category(c) != 'Mn'
     )
 
-    if dados['codigo_doador']:
-        if not dados['codigo_doador'].isdigit() or len(dados['codigo_doador']) != 7:
-            flash('Código do Doador deve conter exatamente 7 números', 'danger')
-            return redirect(url_for('cadastro'))
-
-    if dados['codigo_cps']:
-        if not dados['codigo_cps'].isdigit() or len(dados['codigo_cps']) != 7:
-            flash('Código CPS deve conter exatamente 7 números', 'danger')
-            return redirect(url_for('cadastro'))
 
     dados['imagem'] = None
     if 'imagem' in request.files:
@@ -699,16 +766,6 @@ def editar_patrimonio(id):
                 c for c in unicodedata.normalize('NFD', dados['origem'])
                 if unicodedata.category(c) != 'Mn'
             )
-
-            if dados['codigo_doador']:
-                if not dados['codigo_doador'].isdigit() or len(dados['codigo_doador']) != 7:
-                    flash('Código do Doador deve conter exatamente 7 números', 'danger')
-                    return redirect(url_for('editar_patrimonio', id=id))
-
-            if dados['codigo_cps']:
-                if not dados['codigo_cps'].isdigit() or len(dados['codigo_cps']) != 7:
-                    flash('Código CPS deve conter exatamente 7 números', 'danger')
-                    return redirect(url_for('editar_patrimonio', id=id))
 
             nova_imagem = None
             if 'imagem' in request.files:
